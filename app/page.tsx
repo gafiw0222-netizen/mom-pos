@@ -58,8 +58,31 @@ export default function Home() {
     setTimeout(() => { setToast(null); }, 3000);
   };
 
+  // ➕ กดปุ่มเมนู: ถ้ารายการนี้ยังไม่มีหมายเหตุ ให้รวมยอดเพิ่มจำนวนได้เลย
   const addToCart = (menu: any) => {
-    setCart((prev) => [...prev, { ...menu, cartId: Date.now() + Math.random(), note: "" }]);
+    setCart((prev) => {
+      const existingIndex = prev.findIndex((item) => item.id === menu.id && !item.note);
+      if (existingIndex > -1) {
+        const newCart = [...prev];
+        newCart[existingIndex].quantity += 1;
+        return newCart;
+      } else {
+        return [...prev, { ...menu, cartId: Date.now() + Math.random(), quantity: 1, note: "" }];
+      }
+    });
+  };
+
+  const increaseQty = (cartId: number) => {
+    setCart((prev) => prev.map(item => item.cartId === cartId ? { ...item, quantity: item.quantity + 1 } : item));
+  };
+
+  const decreaseQty = (cartId: number) => {
+    setCart((prev) => prev.map(item => {
+      if (item.cartId === cartId) {
+        return { ...item, quantity: item.quantity - 1 };
+      }
+      return item;
+    }).filter(item => item.quantity > 0));
   };
 
   const removeFromCart = (cartId: number) => {
@@ -98,8 +121,8 @@ export default function Home() {
       return;
     }
 
-    const momTotal = cart.filter(item => item.owner === "mom").reduce((sum, item) => sum + item.price, 0);
-    const auntTotal = cart.filter(item => item.owner === "aunt").reduce((sum, item) => sum + item.price, 0);
+    const momTotal = cart.filter(item => item.owner === "mom").reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const auntTotal = cart.filter(item => item.owner === "aunt").reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const grandTotal = momTotal + auntTotal;
 
     const confirmPay = window.confirm(
@@ -175,7 +198,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* โซนซ้าย: เมนูอาหาร (ปรับให้กดง่าย ไม่กินแรมเครื่อง) */}
+      {/* โซนซ้าย: เมนูอาหาร */}
       <div className="w-full lg:w-2/3 p-3 sm:p-4 overflow-y-auto">
         <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-2">
           <h1 className="text-2xl sm:text-3xl font-extrabold text-blue-600">🍽 ระบบ POS ร้านแม่</h1>
@@ -213,11 +236,10 @@ export default function Home() {
         </div>
       </div>
 
-      {/* โซนขวา: เลือกโต๊ะแบบปุ่มกด + ตะกร้าสินค้า */}
+      {/* โซนขวา: เลือกโต๊ะและตะกร้า พร้อมปุ่ม +/- */}
       <div className="w-full lg:w-1/3 bg-white p-4 shadow-xl flex flex-col border-t lg:border-t-0 lg:border-l">
         <h2 className="text-base font-bold text-gray-700 mb-2">📍 เลือกโต๊ะ หรือ ใส่ถุง:</h2>
         
-        {/* ปุ่มเลือกโต๊ะแบบตารางจิ้มง่าย */}
         <div className="grid grid-cols-4 gap-2 mb-4">
           {tables.map((t) => (
             <button
@@ -234,7 +256,6 @@ export default function Home() {
           ))}
         </div>
 
-        {/* แสดงสถานะโต๊ะที่เลือก */}
         <div className="mb-3 bg-blue-50 p-2 rounded-xl border border-blue-200 text-center">
           <span className="text-sm text-gray-600">กำลังทำรายการของ: </span>
           <span className="text-lg font-extrabold text-blue-600">{table ? (table === 'ใส่ถุง' ? '🛍️ ใส่ถุง' : `📍 โต๊ะ ${table}`) : '⚠️ ยังไม่ได้เลือกโต๊ะ'}</span>
@@ -248,14 +269,21 @@ export default function Home() {
               <li key={item.cartId} className="flex flex-col border-b border-gray-200 pb-2 bg-white p-2.5 rounded-lg shadow-2xs">
                 <div className="flex justify-between items-center text-base font-bold text-black">
                   <div className="flex items-center gap-2">
-                    <button onClick={() => removeFromCart(item.cartId)} className="text-red-500 font-bold text-xs px-2 py-0.5 bg-red-100 rounded-full">X</button>
+                    <button onClick={() => removeFromCart(item.cartId)} className="text-red-500 font-bold text-xs px-2 py-0.5 bg-red-100 rounded-full">ลบ</button>
                     <span>{item.name}</span>
                   </div>
-                  <span className="text-blue-600">{item.price} ฿</span>
+                  
+                  {/* ปุ่มบวก ลบ และจำนวนชิ้น */}
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => decreaseQty(item.cartId)} className="bg-gray-200 hover:bg-gray-300 w-7 h-7 rounded-lg font-black text-lg flex items-center justify-center">-</button>
+                    <span className="text-lg font-black text-blue-600 w-6 text-center">{item.quantity}</span>
+                    <button onClick={() => increaseQty(item.cartId)} className="bg-gray-200 hover:bg-gray-300 w-7 h-7 rounded-lg font-black text-lg flex items-center justify-center">+</button>
+                    <span className="text-blue-600 ml-1">{item.price * item.quantity} ฿</span>
+                  </div>
                 </div>
                 <input 
-                  type="text" placeholder="หมายเหตุ (ถ้ามี)..." 
-                  className="mt-1 w-full p-1.5 border border-gray-200 rounded text-sm bg-gray-50 text-black"
+                  type="text" placeholder="หมายเหตุ (เช่น เผ็ดน้อย)..." 
+                  className="mt-1 w-full p-1.5 border border-gray-200 rounded text-sm bg-gray-50 text-black font-semibold text-orange-600"
                   value={item.note} onChange={(e) => updateNote(item.cartId, e.target.value)}
                 />
               </li>
@@ -267,7 +295,7 @@ export default function Home() {
         </div>
 
         <div className="space-y-2.5 pt-2 border-t">
-          <div className="text-2xl font-black text-right text-gray-800">รวม: {cart.reduce((sum, item) => sum + item.price, 0)} ฿</div>
+          <div className="text-2xl font-black text-right text-gray-800">รวม: {cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)} ฿</div>
           <button onClick={sendToKitchen} className="w-full bg-blue-600 text-white font-bold text-lg p-3 rounded-xl shadow active:bg-blue-700">🔥 ส่งรายการให้พ่อ</button>
           <button onClick={handleCheckout} className="w-full bg-black text-white font-bold text-lg p-3 rounded-xl shadow active:bg-gray-800">💰 คิดเงิน (บันทึกลงระบบ)</button>
           <button onClick={() => setCart([])} className="w-full text-red-500 font-bold py-1 hover:bg-red-50 rounded-lg text-sm">ล้างรายการทั้งหมด</button>
