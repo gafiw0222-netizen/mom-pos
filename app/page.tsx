@@ -35,20 +35,16 @@ export default function Home() {
       return;
     }
     const dadItems = cart.filter((item) => item.kitchen === "dad");
-    
     if (dadItems.length > 0) {
-      socket.emit("send_to_kitchen", {
-        table: table,
-        items: dadItems
-      });
+      socket.emit("send_to_kitchen", { table, items: dadItems });
       alert(`🔥 ส่งออเดอร์ โต๊ะ ${table} ไปครัวพ่อแล้ว!`);
     } else {
       alert("บิลนี้ไม่มีเมนูของพ่อนะแม่");
     }
   };
 
-  // 💰 ระบบคำนวณและคิดเงินแยกยอดแม่กับป้า
-  const handleCheckout = () => {
+  // 💰 คิดเงินและบันทึกลงฐานข้อมูล MongoDB พร้อมเวลาเรียลไทม์
+  const handleCheckout = async () => {
     if (cart.length === 0) {
       alert("⚠️ ยังไม่มีรายการอาหารในบิลนะแม่!");
       return;
@@ -58,15 +54,8 @@ export default function Home() {
       return;
     }
 
-    // คำนวณยอดเงินแยกตามเจ้าของ (owner)
-    const momTotal = cart
-      .filter(item => item.owner === "mom")
-      .reduce((sum, item) => sum + item.price, 0);
-
-    const auntTotal = cart
-      .filter(item => item.owner === "aunt")
-      .reduce((sum, item) => sum + item.price, 0);
-
+    const momTotal = cart.filter(item => item.owner === "mom").reduce((sum, item) => sum + item.price, 0);
+    const auntTotal = cart.filter(item => item.owner === "aunt").reduce((sum, item) => sum + item.price, 0);
     const grandTotal = momTotal + auntTotal;
 
     const confirmPay = window.confirm(
@@ -76,20 +65,46 @@ export default function Home() {
       `👵 ยอดของป้า: ${auntTotal} ฿\n` +
       `----------------------------------\n` +
       `💰 ยอดรวมทั้งสิ้น: ${grandTotal} ฿\n\n` +
-      `ยืนยันการรับเงินและเคลียร์บิลโต๊ะนี้?`
+      `ยืนยันการรับเงินและบันทึกบิลนี้?`
     );
 
     if (confirmPay) {
-      alert("✅ บันทึกยอดขายสำเร็จ!");
-      setCart([]);
-      setTable("");
+      try {
+        const response = await fetch("https://mom-pos-backend-api.onrender.com/api/bills", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            table,
+            items: cart,
+            momTotal,
+            auntTotal,
+            grandTotal,
+            createdAt: new Date() // ส่งเวลาปัจจุบันแบบเรียลไทม์
+          }),
+        });
+
+        if (response.ok) {
+          alert("✅ บันทึกยอดขายและเวลาเรียบร้อย!");
+          setCart([]);
+          setTable("");
+        } else {
+          alert("❌ เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+        }
+      } catch (error) {
+        console.error(error);
+        alert("❌ เชื่อมต่อเซิร์ฟเวอร์ไม่ได้");
+      }
     }
   };
 
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* โซนซ้าย: เมนูอาหาร */}
       <div className="w-2/3 p-4 overflow-y-auto">
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-3xl font-extrabold text-blue-600"> ระบบ POS ร้านอาหาร</h1>
+          <a href="/summary" target="_blank" className="bg-purple-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-purple-700">📊 ไปดูหน้ารวมยอดขาย</a>
+        </div>
+
         <h2 className="text-2xl font-bold mb-2 text-red-600">🔥 ของพ่อ (ส่งเข้าครัว)</h2>
         <div className="grid grid-cols-3 gap-4 mb-8">
           {menus.filter(m => m.kitchen === 'dad').map((menu) => (
@@ -118,7 +133,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* โซนขวา: บิล */}
       <div className="w-1/3 bg-white p-6 shadow-xl flex flex-col h-full">
         <div className="mb-4">
           <input 
@@ -141,7 +155,7 @@ export default function Home() {
                   <span className="text-blue-600">{item.price} ฿</span>
                 </div>
                 <input 
-                  type="text" placeholder="หมายเหตุ: เผ็ดน้อย, ไม่ใส่ร้า..." 
+                  type="text" placeholder="หมายเหตุ: เผ็ดน้อย..." 
                   className="mt-2 w-full p-2 border border-gray-300 rounded text-lg focus:outline-none focus:border-blue-500"
                   value={item.note} onChange={(e) => updateNote(item.cartId, e.target.value)}
                 />
@@ -153,7 +167,7 @@ export default function Home() {
         <div className="space-y-4 pt-4 border-t-2">
           <div className="text-3xl font-bold text-right text-gray-800">รวม: {cart.reduce((sum, item) => sum + item.price, 0)} ฿</div>
           <button onClick={sendToKitchen} className="w-full bg-blue-600 text-white font-bold text-2xl p-4 rounded-xl shadow-lg active:bg-blue-700 transition-colors">🔥 ส่งรายการให้พ่อ</button>
-          <button onClick={handleCheckout} className="w-full bg-black text-white font-bold text-xl p-4 rounded-xl shadow-lg active:bg-gray-800 transition-colors">💰 คิดเงิน (แยกยอดแม่กับป้า)</button>
+          <button onClick={handleCheckout} className="w-full bg-black text-white font-bold text-xl p-4 rounded-xl shadow-lg active:bg-gray-800 transition-colors">💰 คิดเงิน (บันทึกลงระบบ)</button>
           <button onClick={() => {setCart([]); setTable("");}} className="w-full text-red-500 font-bold p-2 hover:bg-red-50 rounded-lg transition-colors text-lg">ล้างรายการทั้งหมด</button>
         </div>
       </div>
