@@ -13,6 +13,8 @@ const menus = [
   { id: 6, name: "ข้าวเหนียว", price: 10, owner: "aunt", kitchen: "aunt", color: "bg-yellow-500" },
 ];
 
+const tables = ["1", "2", "3", "5", "7", "9", "10", "11", "22", "33", "ใส่ถุง"];
+
 export default function Home() {
   const [cart, setCart] = useState<any[]>([]);
   const [table, setTable] = useState("");
@@ -53,24 +55,24 @@ export default function Home() {
   const showToast = (type: 'success' | 'error', message: string) => {
     setToast({ type, message });
     playSound(type);
-    setTimeout(() => { setToast(null); }, 4000);
+    setTimeout(() => { setToast(null); }, 3000);
   };
 
   const addToCart = (menu: any) => {
-    setCart([...cart, { ...menu, cartId: Date.now(), note: "" }]);
+    setCart((prev) => [...prev, { ...menu, cartId: Date.now() + Math.random(), note: "" }]);
   };
 
   const removeFromCart = (cartId: number) => {
-    setCart(cart.filter(item => item.cartId !== cartId));
+    setCart((prev) => prev.filter(item => item.cartId !== cartId));
   };
 
   const updateNote = (cartId: number, note: string) => {
-    setCart(cart.map(item => item.cartId === cartId ? { ...item, note } : item));
+    setCart((prev) => prev.map(item => item.cartId === cartId ? { ...item, note } : item));
   };
 
   const sendToKitchen = () => {
     if (!table) {
-      showToast('error', "⚠️ แม่อย่าลืมใส่เบอร์โต๊ะนะ!");
+      showToast('error', "⚠️ แม่ยังไม่ได้เลือกโต๊ะนะ!");
       return;
     }
     const dadItems = cart.filter((item) => item.kitchen === "dad");
@@ -80,7 +82,7 @@ export default function Home() {
         table, 
         items: dadItems 
       });
-      showToast('success', `🔥 ส่งออเดอร์ โต๊ะ ${table} ไปครัวพ่อแล้ว!`);
+      showToast('success', `🔥 ส่งออเดอร์ ${table === 'ใส่ถุง' ? 'ใส่ถุง' : 'โต๊ะ ' + table} ไปครัวพ่อแล้ว!`);
     } else {
       showToast('error', "บิลนี้ไม่มีเมนูของพ่อนะแม่");
     }
@@ -92,7 +94,7 @@ export default function Home() {
       return;
     }
     if (!table) {
-      showToast('error', "⚠️️ แม่อย่าลืมใส่เบอร์โต๊ะก่อนคิดเงินนะ!");
+      showToast('error', "⚠️ แม่ยังไม่ได้เลือกโต๊ะก่อนคิดเงินนะ!");
       return;
     }
 
@@ -101,7 +103,7 @@ export default function Home() {
     const grandTotal = momTotal + auntTotal;
 
     const confirmPay = window.confirm(
-      `🧾 สรุปยอดเงิน โต๊ะ ${table}\n` +
+      `🧾 สรุปยอดเงิน (${table === 'ใส่ถุง' ? 'ใส่ถุง' : 'โต๊ะ ' + table})\n` +
       `----------------------------------\n` +
       `👩‍🦰 ยอดของแม่: ${momTotal} ฿\n` +
       `👵 ยอดของป้า: ${auntTotal} ฿\n` +
@@ -113,19 +115,15 @@ export default function Home() {
     if (!confirmPay) return;
 
     setIsSaving(true);
-    setProgress(15);
-    setStatusText("กำลังเชื่อมต่อเซิร์ฟเวอร์...");
+    setProgress(30);
+    setStatusText("กำลังบันทึกลงระบบ...");
 
     try {
-      await new Promise((r) => setTimeout(r, 200));
-      setProgress(50);
-      setStatusText("กำลังบันทึกลง MongoDB...");
-
       const response = await fetch("https://mom-pos-backend-api.onrender.com/api/bills", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          table,
+          table: table === 'ใส่ถุง' ? 'ใส่ถุง' : `โต๊ะ ${table}`,
           items: cart,
           momTotal,
           auntTotal,
@@ -134,19 +132,16 @@ export default function Home() {
         }),
       });
 
-      setProgress(85);
-      setStatusText("กำลังตรวจสอบความถูกต้อง...");
-      await new Promise((r) => setTimeout(r, 200));
+      setProgress(100);
+      setStatusText("บันทึกสำเร็จ!");
 
       if (response.ok) {
-        setProgress(100);
-        setStatusText("บันทึกสำเร็จ!");
         setTimeout(() => {
           setIsSaving(false);
           setCart([]);
           setTable("");
-          showToast('success', "✅ บันทึกยอดขายสำเร็จเรียบร้อย!");
-        }, 300);
+          showToast('success', "✅ บันทึกยอดขายสำเร็จ!");
+        }, 200);
       } else {
         throw new Error("Failed to save");
       }
@@ -157,9 +152,9 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen bg-gray-100 relative">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-gray-100 relative select-none">
       {toast && (
-        <div className={`fixed top-5 right-5 z-50 p-4 rounded-2xl shadow-2xl text-white font-bold text-xl transition-all animate-bounce ${
+        <div className={`fixed top-4 right-4 z-50 p-4 rounded-2xl shadow-2xl text-white font-bold text-lg transition-all ${
           toast.type === 'success' ? 'bg-green-600' : 'bg-red-600'
         }`}>
           {toast.message}
@@ -167,97 +162,115 @@ export default function Home() {
       )}
 
       {isSaving && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center backdrop-blur-sm p-4">
-          <div className="bg-white p-6 rounded-3xl shadow-2xl w-full max-w-sm text-center border-4 border-blue-500">
-            <h3 className="text-2xl font-black text-blue-600 mb-4">⏳ กำลังบันทึกข้อมูล...</h3>
-            <div className="w-full bg-gray-200 rounded-full h-6 mb-4 overflow-hidden border">
-              <div 
-                className="bg-blue-600 h-6 transition-all duration-300 font-bold text-white text-sm flex items-center justify-center"
-                style={{ width: `${progress}%` }}
-              >
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
+          <div className="bg-white p-6 rounded-3xl shadow-2xl w-full max-w-xs text-center border-4 border-blue-500">
+            <h3 className="text-xl font-black text-blue-600 mb-3">⏳ กำลังบันทึก...</h3>
+            <div className="w-full bg-gray-200 rounded-full h-5 mb-3 overflow-hidden border">
+              <div className="bg-blue-600 h-5 font-bold text-white text-xs flex items-center justify-center" style={{ width: `${progress}%` }}>
                 {progress}%
               </div>
             </div>
-            <p className="text-lg font-bold text-gray-600">{statusText}</p>
+            <p className="text-base font-bold text-gray-600">{statusText}</p>
           </div>
         </div>
       )}
 
-      {/* โซนซ้าย: เมนูอาหาร */}
-      <div className="w-full lg:w-2/3 p-4 overflow-y-auto">
+      {/* โซนซ้าย: เมนูอาหาร (ปรับให้กดง่าย ไม่กินแรมเครื่อง) */}
+      <div className="w-full lg:w-2/3 p-3 sm:p-4 overflow-y-auto">
         <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-2">
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-blue-600 text-center sm:text-left">🍽 ระบบ POS ร้านอาหาร</h1>
-          <a href="/summary" target="_blank" className="bg-purple-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-purple-700 shadow text-sm sm:text-base">📊 ไปดูหน้ารวมยอดขาย</a>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-blue-600">🍽 ระบบ POS ร้านแม่</h1>
+          <a href="/summary" target="_blank" className="bg-purple-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-purple-700 shadow text-sm">📊 หน้ารวมยอดขาย</a>
         </div>
 
-        <h2 className="text-xl font-bold mb-2 text-red-600">🔥 ของพ่อ (ส่งเข้าครัว)</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+        <h2 className="text-lg font-bold mb-2 text-red-600">🔥 ของพ่อ (ส่งครัว)</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 mb-4">
           {menus.filter(m => m.kitchen === 'dad').map((menu) => (
-            <button key={menu.id} onClick={() => addToCart(menu)} className={`${menu.color} text-white font-bold text-xl sm:text-2xl p-4 sm:p-8 rounded-xl shadow-md active:scale-95 transition-transform flex flex-col items-center justify-center`}>
+            <button key={menu.id} onClick={() => addToCart(menu)} className={`${menu.color} text-white font-bold text-lg sm:text-xl p-4 sm:p-6 rounded-xl shadow active:scale-95 transition-transform flex flex-col items-center justify-center`}>
               <span>{menu.name}</span> 
-              <span className="text-sm sm:text-lg mt-1 font-normal">{menu.price} ฿</span>
+              <span className="text-sm font-normal mt-1">{menu.price} ฿</span>
             </button>
           ))}
         </div>
 
-        <h2 className="text-xl font-bold mb-2 text-green-600">🥗 ของแม่ (ส้มตำ)</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+        <h2 className="text-lg font-bold mb-2 text-green-600">🥗 ของแม่ (ส้มตำ)</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 mb-4">
           {menus.filter(m => m.kitchen === 'mom').map((menu) => (
-            <button key={menu.id} onClick={() => addToCart(menu)} className={`${menu.color} text-white font-bold text-xl sm:text-2xl p-4 sm:p-8 rounded-xl shadow-md active:scale-95 transition-transform flex flex-col items-center justify-center`}>
+            <button key={menu.id} onClick={() => addToCart(menu)} className={`${menu.color} text-white font-bold text-lg sm:text-xl p-4 sm:p-6 rounded-xl shadow active:scale-95 transition-transform flex flex-col items-center justify-center`}>
               <span>{menu.name}</span> 
-              <span className="text-sm sm:text-lg mt-1 font-normal">{menu.price} ฿</span>
+              <span className="text-sm font-normal mt-1">{menu.price} ฿</span>
             </button>
           ))}
         </div>
 
-        <h2 className="text-xl font-bold mb-2 text-yellow-600">🍗 ของป้า (ปิ้งย่าง/ข้าว)</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+        <h2 className="text-lg font-bold mb-2 text-yellow-600">🍗 ของป้า (ปิ้งย่าง/ข้าว)</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 mb-4">
           {menus.filter(m => m.kitchen === 'aunt').map((menu) => (
-            <button key={menu.id} onClick={() => addToCart(menu)} className={`${menu.color} text-white font-bold text-xl sm:text-2xl p-4 sm:p-8 rounded-xl shadow-md active:scale-95 transition-transform text-black flex flex-col items-center justify-center`}>
+            <button key={menu.id} onClick={() => addToCart(menu)} className={`${menu.color} text-white font-bold text-lg sm:text-xl p-4 sm:p-6 rounded-xl shadow active:scale-95 transition-transform text-black flex flex-col items-center justify-center`}>
               <span>{menu.name}</span> 
-              <span className="text-sm sm:text-lg mt-1 font-normal">{menu.price} ฿</span>
+              <span className="text-sm font-normal mt-1">{menu.price} ฿</span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* โซนขวา: ตะกร้าและคิดเงิน */}
-      <div className="w-full lg:w-1/3 bg-white p-4 sm:p-6 shadow-xl flex flex-col border-t lg:border-t-0 lg:border-l">
-        <div className="mb-4">
-          <input 
-            type="text" placeholder="📍 ระบุเบอร์โต๊ะ หรือ ใส่ถุง" 
-            className="w-full text-xl sm:text-2xl p-3 sm:p-4 border-2 border-blue-400 rounded-lg focus:outline-none focus:border-blue-600 font-bold bg-blue-50 text-black"
-            value={table} onChange={(e) => setTable(e.target.value)}
-          />
-        </div>
-        <h2 className="text-lg sm:text-xl font-bold mb-2 text-gray-700">รายการอาหาร:</h2>
+      {/* โซนขวา: เลือกโต๊ะแบบปุ่มกด + ตะกร้าสินค้า */}
+      <div className="w-full lg:w-1/3 bg-white p-4 shadow-xl flex flex-col border-t lg:border-t-0 lg:border-l">
+        <h2 className="text-base font-bold text-gray-700 mb-2">📍 เลือกโต๊ะ หรือ ใส่ถุง:</h2>
         
-        <div className="flex-1 overflow-y-auto mb-4 bg-gray-50 rounded-lg p-2 border max-h-60 lg:max-h-none">
-          <ul className="space-y-3">
+        {/* ปุ่มเลือกโต๊ะแบบตารางจิ้มง่าย */}
+        <div className="grid grid-cols-4 gap-2 mb-4">
+          {tables.map((t) => (
+            <button
+              key={t}
+              onClick={() => setTable(t)}
+              className={`py-3 rounded-xl font-black text-lg transition-all ${
+                table === t 
+                  ? 'bg-blue-600 text-white shadow-lg scale-105 ring-2 ring-blue-300' 
+                  : 'bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-300'
+              }`}
+            >
+              {t === 'ใส่ถุง' ? '🛍️ ใส่ถุง' : `โต๊ะ ${t}`}
+            </button>
+          ))}
+        </div>
+
+        {/* แสดงสถานะโต๊ะที่เลือก */}
+        <div className="mb-3 bg-blue-50 p-2 rounded-xl border border-blue-200 text-center">
+          <span className="text-sm text-gray-600">กำลังทำรายการของ: </span>
+          <span className="text-lg font-extrabold text-blue-600">{table ? (table === 'ใส่ถุง' ? '🛍️ ใส่ถุง' : `📍 โต๊ะ ${table}`) : '⚠️ ยังไม่ได้เลือกโต๊ะ'}</span>
+        </div>
+
+        <h2 className="text-base font-bold text-gray-700 mb-1">รายการอาหารในบิล:</h2>
+        
+        <div className="flex-1 overflow-y-auto mb-3 bg-gray-50 rounded-xl p-2 border max-h-48 lg:max-h-none">
+          <ul className="space-y-2">
             {cart.map((item) => (
-              <li key={item.cartId} className="flex flex-col border-b border-gray-200 pb-3 bg-white p-3 rounded shadow-sm">
-                <div className="flex justify-between items-center text-lg sm:text-xl font-bold text-black">
+              <li key={item.cartId} className="flex flex-col border-b border-gray-200 pb-2 bg-white p-2.5 rounded-lg shadow-2xs">
+                <div className="flex justify-between items-center text-base font-bold text-black">
                   <div className="flex items-center gap-2">
-                    <button onClick={() => removeFromCart(item.cartId)} className="text-red-500 font-bold text-sm px-2 py-0.5 bg-red-100 rounded-full hover:bg-red-200">X</button>
+                    <button onClick={() => removeFromCart(item.cartId)} className="text-red-500 font-bold text-xs px-2 py-0.5 bg-red-100 rounded-full">X</button>
                     <span>{item.name}</span>
                   </div>
                   <span className="text-blue-600">{item.price} ฿</span>
                 </div>
                 <input 
-                  type="text" placeholder="หมายเหตุ: เผ็ดน้อย..." 
-                  className="mt-2 w-full p-2 border border-gray-300 rounded text-sm sm:text-lg focus:outline-none focus:border-blue-500 text-black"
+                  type="text" placeholder="หมายเหตุ (ถ้ามี)..." 
+                  className="mt-1 w-full p-1.5 border border-gray-200 rounded text-sm bg-gray-50 text-black"
                   value={item.note} onChange={(e) => updateNote(item.cartId, e.target.value)}
                 />
               </li>
             ))}
+            {cart.length === 0 && (
+              <p className="text-center text-gray-400 py-6 text-sm">ยังไม่มีเมนูในตะกร้า</p>
+            )}
           </ul>
         </div>
 
-        <div className="space-y-3 pt-4 border-t-2">
-          <div className="text-2xl sm:text-3xl font-bold text-right text-gray-800">รวม: {cart.reduce((sum, item) => sum + item.price, 0)} ฿</div>
-          <button onClick={sendToKitchen} className="w-full bg-blue-600 text-white font-bold text-xl sm:text-2xl p-3 sm:p-4 rounded-xl shadow-lg active:bg-blue-700 transition-colors">🔥 ส่งรายการให้พ่อ</button>
-          <button onClick={handleCheckout} className="w-full bg-black text-white font-bold text-lg sm:text-xl p-3 sm:p-4 rounded-xl shadow-lg active:bg-gray-800 transition-colors">💰 คิดเงิน (บันทึกลงระบบ)</button>
-          <button onClick={() => {setCart([]); setTable("");}} className="w-full text-red-500 font-bold p-2 hover:bg-red-50 rounded-lg transition-colors text-base sm:text-lg">ล้างรายการทั้งหมด</button>
+        <div className="space-y-2.5 pt-2 border-t">
+          <div className="text-2xl font-black text-right text-gray-800">รวม: {cart.reduce((sum, item) => sum + item.price, 0)} ฿</div>
+          <button onClick={sendToKitchen} className="w-full bg-blue-600 text-white font-bold text-lg p-3 rounded-xl shadow active:bg-blue-700">🔥 ส่งรายการให้พ่อ</button>
+          <button onClick={handleCheckout} className="w-full bg-black text-white font-bold text-lg p-3 rounded-xl shadow active:bg-gray-800">💰 คิดเงิน (บันทึกลงระบบ)</button>
+          <button onClick={() => setCart([])} className="w-full text-red-500 font-bold py-1 hover:bg-red-50 rounded-lg text-sm">ล้างรายการทั้งหมด</button>
         </div>
       </div>
     </div>
