@@ -16,6 +16,47 @@ const menus = [
 export default function Home() {
   const [cart, setCart] = useState<any[]>([]);
   const [table, setTable] = useState("");
+  
+  // UI สถานะการบันทึกและ Progress Bar
+  const [isSaving, setIsSaving] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [statusText, setStatusText] = useState("");
+  const [toast, setToast] = useState<{ type: 'success' | 'error', message: string } | null>(null);
+
+  // 🔊 ระบบสร้างเสียงแจ้งเตือนด้วย Web Audio API (ไม่ต้องโหลดไฟล์ เสียงดังทันที 100%)
+  const playSound = (type: 'success' | 'error') => {
+    try {
+      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      if (type === 'success') {
+        osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+        osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.1); // A5
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.35);
+      } else {
+        osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+        osc.frequency.setValueAtTime(100, audioCtx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.35);
+      }
+    } catch (e) {
+      console.log("Audio error", e);
+    }
+  };
+
+  const showToast = (type: 'success' | 'error', message: string) => {
+    setToast({ type, message });
+    playSound(type);
+    setTimeout(() => { setToast(null); }, 4000);
+  };
 
   const addToCart = (menu: any) => {
     setCart([...cart, { ...menu, cartId: Date.now(), note: "" }]);
@@ -31,26 +72,26 @@ export default function Home() {
 
   const sendToKitchen = () => {
     if (!table) {
-      alert("⚠️ แม่อย่าลืมใส่เบอร์โต๊ะนะ!");
+      showToast('error', "⚠️ แม่อย่าลืมใส่เบอร์โต๊ะนะ!");
       return;
     }
     const dadItems = cart.filter((item) => item.kitchen === "dad");
     if (dadItems.length > 0) {
       socket.emit("send_to_kitchen", { table, items: dadItems });
-      alert(`🔥 ส่งออเดอร์ โต๊ะ ${table} ไปครัวพ่อแล้ว!`);
+      showToast('success', `🔥 ส่งออเดอร์ โต๊ะ ${table} ไปครัวพ่อแล้ว!`);
     } else {
-      alert("บิลนี้ไม่มีเมนูของพ่อนะแม่");
+      showToast('error', "บิลนี้ไม่มีเมนูของพ่อนะแม่");
     }
   };
 
-  // 💰 คิดเงินและบันทึกลงฐานข้อมูล MongoDB พร้อมเวลาเรียลไทม์
+  // 💰 ระบบคิดเงินพร้อม UI Loading % และเสียงแจ้งเตือน
   const handleCheckout = async () => {
     if (cart.length === 0) {
-      alert("⚠️ ยังไม่มีรายการอาหารในบิลนะแม่!");
+      showToast('error', "⚠️ ยังไม่มีรายการอาหารในบิลนะแม่!");
       return;
     }
     if (!table) {
-      alert("⚠️ แม่อย่าลืมใส่เบอร์โต๊ะก่อนคิดเงินนะ!");
+      showToast('error', "⚠️ แม่อย่าลืมใส่เบอร์โต๊ะก่อนคิดเงินนะ!");
       return;
     }
 
@@ -68,41 +109,87 @@ export default function Home() {
       `ยืนยันการรับเงินและบันทึกบิลนี้?`
     );
 
-    if (confirmPay) {
-      try {
-        const response = await fetch("https://mom-pos-backend-api.onrender.com/api/bills", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            table,
-            items: cart,
-            momTotal,
-            auntTotal,
-            grandTotal,
-            createdAt: new Date() // ส่งเวลาปัจจุบันแบบเรียลไทม์
-          }),
-        });
+    if (!confirmPay) return;
 
-        if (response.ok) {
-          alert("✅ บันทึกยอดขายและเวลาเรียบร้อย!");
+    // เริ่มโชว์ UI กำลังบันทึก (0%)
+    setIsSaving(true);
+    setProgress(15);
+    setStatusText("กำลังเชื่อมต่อเซิร์ฟเวอร์...");
+
+    try {
+      await new Promise((r) => setTimeout(r, 300));
+      setProgress(50);
+      setStatusText("กำลังบันทึกลง MongoDB...");
+
+      const response = await fetch("https://mom-pos-backend-api.onrender.com/api/bills", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          table,
+          items: cart,
+          momTotal,
+          auntTotal,
+          grandTotal,
+          createdAt: new Date()
+        }),
+      });
+
+      setProgress(85);
+      setStatusText("กำลังตรวจสอบความถูกต้อง...");
+      await new Promise((r) => setTimeout(r, 300));
+
+      if (response.ok) {
+        setProgress(100);
+        setStatusText("บันทึกสำเร็จ!");
+        setTimeout(() => {
+          setIsSaving(false);
           setCart([]);
           setTable("");
-        } else {
-          alert("❌ เกิดข้อผิดพลาดในการบันทึกข้อมูล");
-        }
-      } catch (error) {
-        console.error(error);
-        alert("❌ เชื่อมต่อเซิร์ฟเวอร์ไม่ได้");
+          showToast('success', "✅ บันทึกยอดขายสำเร็จเรียบร้อย!");
+        }, 400);
+      } else {
+        throw new Error("Failed to save");
       }
+    } catch (error) {
+      setIsSaving(false);
+      showToast('error', "❌ บันทึกไม่สำเร็จ! (เช็ค Render / MongoDB URI)");
     }
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gray-100 relative">
+      {/* 🔔 Toast แจ้งเตือนมุมจอ */}
+      {toast && (
+        <div className={`fixed top-5 right-5 z-50 p-4 rounded-2xl shadow-2xl text-white font-bold text-xl transition-all animate-bounce ${
+          toast.type === 'success' ? 'bg-green-600' : 'bg-red-600'
+        }`}>
+          {toast.message}
+        </div>
+      )}
+
+      {/* ⏳ Modal โชว์เปอร์เซ็นต์กำลังบันทึก (Progress Bar) */}
+      {isSaving && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center backdrop-blur-sm">
+          <div className="bg-white p-8 rounded-3xl shadow-2xl w-96 text-center border-4 border-blue-500">
+            <h3 className="text-2xl font-black text-blue-600 mb-4">⏳ กำลังบันทึกข้อมูล...</h3>
+            <div className="w-full bg-gray-200 rounded-full h-6 mb-4 overflow-hidden border">
+              <div 
+                className="bg-blue-600 h-6 transition-all duration-300 font-bold text-white text-sm flex items-center justify-center"
+                style={{ width: `${progress}%` }}
+              >
+                {progress}%
+              </div>
+            </div>
+            <p className="text-lg font-bold text-gray-600">{statusText}</p>
+          </div>
+        </div>
+      )}
+
+      {/* โซนซ้าย: เมนูอาหาร */}
       <div className="w-2/3 p-4 overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-3xl font-extrabold text-blue-600"> ระบบ POS ร้านอาหาร</h1>
-          <a href="/summary" target="_blank" className="bg-purple-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-purple-700">📊 ไปดูหน้ารวมยอดขาย</a>
+          <h1 className="text-3xl font-extrabold text-blue-600">🍽️ ระบบ POS ร้านอาหาร</h1>
+          <a href="/summary" target="_blank" className="bg-purple-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-purple-700 shadow">📊 ไปดูหน้ารวมยอดขาย</a>
         </div>
 
         <h2 className="text-2xl font-bold mb-2 text-red-600">🔥 ของพ่อ (ส่งเข้าครัว)</h2>
@@ -133,11 +220,12 @@ export default function Home() {
         </div>
       </div>
 
+      {/* โซนขวา: บิล */}
       <div className="w-1/3 bg-white p-6 shadow-xl flex flex-col h-full">
         <div className="mb-4">
           <input 
             type="text" placeholder="📍 ระบุเบอร์โต๊ะ หรือ พิมพ์ว่า ใส่ถุง" 
-            className="w-full text-2xl p-4 border-2 border-blue-400 rounded-lg focus:outline-none focus:border-blue-600 font-bold bg-blue-50"
+            className="w-full text-2xl p-4 border-2 border-blue-400 rounded-lg focus:outline-none focus:border-blue-600 font-bold bg-blue-50 text-black"
             value={table} onChange={(e) => setTable(e.target.value)}
           />
         </div>
@@ -147,7 +235,7 @@ export default function Home() {
           <ul className="space-y-3">
             {cart.map((item) => (
               <li key={item.cartId} className="flex flex-col border-b border-gray-200 pb-3 bg-white p-3 rounded shadow-sm">
-                <div className="flex justify-between items-center text-xl font-bold">
+                <div className="flex justify-between items-center text-xl font-bold text-black">
                   <div className="flex items-center gap-2">
                     <button onClick={() => removeFromCart(item.cartId)} className="text-red-500 font-bold text-sm px-3 py-1 bg-red-100 rounded-full hover:bg-red-200">X</button>
                     <span>{item.name}</span>
@@ -156,7 +244,7 @@ export default function Home() {
                 </div>
                 <input 
                   type="text" placeholder="หมายเหตุ: เผ็ดน้อย..." 
-                  className="mt-2 w-full p-2 border border-gray-300 rounded text-lg focus:outline-none focus:border-blue-500"
+                  className="mt-2 w-full p-2 border border-gray-300 rounded text-lg focus:outline-none focus:border-blue-500 text-black"
                   value={item.note} onChange={(e) => updateNote(item.cartId, e.target.value)}
                 />
               </li>
