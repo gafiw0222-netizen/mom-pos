@@ -2,36 +2,24 @@
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
-// เชื่อมต่อ Socket ไปยัง Backend บน Render
 const socket = io("https://mom-pos-backend-api.onrender.com");
 
 export default function KitchenPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [active, setActive] = useState(false);
 
-  // 🔊 เสียงกระดิ่งเตือนครัวอัตโนมัติ
+  // 🔊 เล่นไฟล์เสียง bell.mp3 จากโฟลเดอร์ public ด้วยความดังสูงสุด
   const playSound = () => {
     try {
-      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      
-      osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
-      osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.15); // A5
-      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
-      
-      osc.start();
-      osc.stop(audioCtx.currentTime + 0.5);
+      const audio = new Audio('/bell.mp3');
+      audio.volume = 1.0; // ปรับเสียงดังสุด 100%
+      audio.play().catch(e => console.log("Audio play error:", e));
     } catch (e) {
       console.log("Audio error", e);
     }
   };
 
   useEffect(() => {
-    // รอรับออเดอร์ที่ส่งมาจากแม่แบบเรียลไทม์
     socket.on("receive_order", (data) => {
       playSound();
       setOrders((prev) => [data, ...prev]);
@@ -46,7 +34,6 @@ export default function KitchenPage() {
     setOrders(orders.filter((_, i) => i !== index));
   };
 
-  // หน้าจอแรกให้พ่อกดปุ่มเปิดเสียงระบบก่อนใช้งาน
   if (!active) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
@@ -71,7 +58,7 @@ export default function KitchenPage() {
       ) : (
         <div className="grid grid-cols-2 gap-6">
           {orders.map((order, idx) => (
-            <div key={idx} className="bg-gray-900 border-4 border-red-500 rounded-3xl p-6 shadow-2xl">
+            <div key={idx} className="bg-gray-900 border-4 border-red-500 rounded-3xl p-6 shadow-2xl animate-bounce">
               <div className="flex justify-between items-center mb-4 border-b border-gray-700 pb-3">
                 <h2 className="text-3xl font-extrabold text-yellow-400">โต๊ะ: {order.table}</h2>
                 <button 
@@ -83,6 +70,7 @@ export default function KitchenPage() {
               <ul className="space-y-3">
                 {order.items.map((item: any, i: number) => (
                   <li key={i} className="bg-gray-800 p-4 rounded-xl flex flex-col">
+                    <link />
                     <div className="flex justify-between text-2xl font-bold">
                       <span>• {item.name}</span>
                       <span className="text-green-400">{item.price} ฿</span>
