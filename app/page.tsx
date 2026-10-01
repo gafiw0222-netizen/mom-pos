@@ -17,13 +17,12 @@ export default function Home() {
   const [cart, setCart] = useState<any[]>([]);
   const [table, setTable] = useState("");
   
-  // UI สถานะการบันทึกและ Progress Bar
   const [isSaving, setIsSaving] = useState(false);
   const [progress, setProgress] = useState(0);
   const [statusText, setStatusText] = useState("");
   const [toast, setToast] = useState<{ type: 'success' | 'error', message: string } | null>(null);
 
-  // 🔊 ระบบสร้างเสียงแจ้งเตือนด้วย Web Audio API (ไม่ต้องโหลดไฟล์ เสียงดังทันที 100%)
+  // 🔊 ระบบเสียงสังเคราะห์อัตโนมัติ (เสียงใสตอนสำเร็จ / เสียงต่ำตอนผิดพลาด)
   const playSound = (type: 'success' | 'error') => {
     try {
       const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -84,14 +83,13 @@ export default function Home() {
     }
   };
 
-  // 💰 ระบบคิดเงินพร้อม UI Loading % และเสียงแจ้งเตือน
   const handleCheckout = async () => {
     if (cart.length === 0) {
       showToast('error', "⚠️ ยังไม่มีรายการอาหารในบิลนะแม่!");
       return;
     }
     if (!table) {
-      showToast('error', "⚠️ แม่อย่าลืมใส่เบอร์โต๊ะก่อนคิดเงินนะ!");
+      showToast('error', "⚠️️ แม่อย่าลืมใส่เบอร์โต๊ะก่อนคิดเงินนะ!");
       return;
     }
 
@@ -111,13 +109,12 @@ export default function Home() {
 
     if (!confirmPay) return;
 
-    // เริ่มโชว์ UI กำลังบันทึก (0%)
     setIsSaving(true);
     setProgress(15);
     setStatusText("กำลังเชื่อมต่อเซิร์ฟเวอร์...");
 
     try {
-      await new Promise((r) => setTimeout(r, 300));
+      await new Promise((r) => setTimeout(r, 200));
       setProgress(50);
       setStatusText("กำลังบันทึกลง MongoDB...");
 
@@ -136,7 +133,7 @@ export default function Home() {
 
       setProgress(85);
       setStatusText("กำลังตรวจสอบความถูกต้อง...");
-      await new Promise((r) => setTimeout(r, 300));
+      await new Promise((r) => setTimeout(r, 200));
 
       if (response.ok) {
         setProgress(100);
@@ -146,19 +143,18 @@ export default function Home() {
           setCart([]);
           setTable("");
           showToast('success', "✅ บันทึกยอดขายสำเร็จเรียบร้อย!");
-        }, 400);
+        }, 300);
       } else {
         throw new Error("Failed to save");
       }
     } catch (error) {
       setIsSaving(false);
-      showToast('error', "❌ บันทึกไม่สำเร็จ! (เช็ค Render / MongoDB URI)");
+      showToast('error', "❌ บันทึกไม่สำเร็จ!");
     }
   };
 
   return (
     <div className="flex h-screen bg-gray-100 relative">
-      {/* 🔔 Toast แจ้งเตือนมุมจอ */}
       {toast && (
         <div className={`fixed top-5 right-5 z-50 p-4 rounded-2xl shadow-2xl text-white font-bold text-xl transition-all animate-bounce ${
           toast.type === 'success' ? 'bg-green-600' : 'bg-red-600'
@@ -167,7 +163,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* ⏳ Modal โชว์เปอร์เซ็นต์กำลังบันทึก (Progress Bar) */}
       {isSaving && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center backdrop-blur-sm">
           <div className="bg-white p-8 rounded-3xl shadow-2xl w-96 text-center border-4 border-blue-500">
@@ -185,10 +180,9 @@ export default function Home() {
         </div>
       )}
 
-      {/* โซนซ้าย: เมนูอาหาร */}
       <div className="w-2/3 p-4 overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-3xl font-extrabold text-blue-600">🍽️ ระบบ POS ร้านอาหาร</h1>
+          <h1 className="text-3xl font-extrabold text-blue-600">🍽️️ ระบบ POS ร้านอาหาร</h1>
           <a href="/summary" target="_blank" className="bg-purple-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-purple-700 shadow">📊 ไปดูหน้ารวมยอดขาย</a>
         </div>
 
@@ -220,7 +214,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* โซนขวา: บิล */}
       <div className="w-1/3 bg-white p-6 shadow-xl flex flex-col h-full">
         <div className="mb-4">
           <input 
