@@ -92,7 +92,7 @@ export default function Home() {
       return;
     }
     if (!table) {
-      showToast('error', "⚠️ แม่อย่าลืมใส่เบอร์โต๊ะก่อนคิดเงินนะ!");
+      showToast('error', "⚠️️ แม่อย่าลืมใส่เบอร์โต๊ะก่อนคิดเงินนะ!");
       return;
     }
 
@@ -157,7 +157,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100 relative">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-gray-100 relative">
       {toast && (
         <div className={`fixed top-5 right-5 z-50 p-4 rounded-2xl shadow-2xl text-white font-bold text-xl transition-all animate-bounce ${
           toast.type === 'success' ? 'bg-green-600' : 'bg-red-600'
@@ -167,8 +167,8 @@ export default function Home() {
       )}
 
       {isSaving && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center backdrop-blur-sm">
-          <div className="bg-white p-8 rounded-3xl shadow-2xl w-96 text-center border-4 border-blue-500">
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center backdrop-blur-sm p-4">
+          <div className="bg-white p-6 rounded-3xl shadow-2xl w-full max-w-sm text-center border-4 border-blue-500">
             <h3 className="text-2xl font-black text-blue-600 mb-4">⏳ กำลังบันทึกข้อมูล...</h3>
             <div className="w-full bg-gray-200 rounded-full h-6 mb-4 overflow-hidden border">
               <div 
@@ -183,64 +183,69 @@ export default function Home() {
         </div>
       )}
 
-      <div className="w-2/3 p-4 overflow-y-auto">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-3xl font-extrabold text-blue-600">🍽 ระบบ POS ร้านอาหาร</h1>
-          <a href="/summary" target="_blank" className="bg-purple-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-purple-700 shadow">📊 ไปดูหน้ารวมยอดขาย</a>
+      {/* โซนซ้าย: เมนูอาหาร */}
+      <div className="w-full lg:w-2/3 p-4 overflow-y-auto">
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-2">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-blue-600 text-center sm:text-left">🍽 ระบบ POS ร้านอาหาร</h1>
+          <a href="/summary" target="_blank" className="bg-purple-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-purple-700 shadow text-sm sm:text-base">📊 ไปดูหน้ารวมยอดขาย</a>
         </div>
 
-        <h2 className="text-2xl font-bold mb-2 text-red-600">🔥 ของพ่อ (ส่งเข้าครัว)</h2>
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <h2 className="text-xl font-bold mb-2 text-red-600">🔥 ของพ่อ (ส่งเข้าครัว)</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
           {menus.filter(m => m.kitchen === 'dad').map((menu) => (
-            <button key={menu.id} onClick={() => addToCart(menu)} className={`${menu.color} text-white font-bold text-2xl p-8 rounded-xl shadow-md active:scale-95 transition-transform`}>
-              {menu.name} <div className="text-lg mt-2 font-normal">{menu.price} ฿</div>
+            <button key={menu.id} onClick={() => addToCart(menu)} className={`${menu.color} text-white font-bold text-xl sm:text-2xl p-4 sm:p-8 rounded-xl shadow-md active:scale-95 transition-transform flex flex-col items-center justify-center`}>
+              <span>{menu.name}</span> 
+              <span className="text-sm sm:text-lg mt-1 font-normal">{menu.price} ฿</span>
             </button>
           ))}
         </div>
 
-        <h2 className="text-2xl font-bold mb-2 text-green-600">🥗 ของแม่ (ส้มตำ)</h2>
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <h2 className="text-xl font-bold mb-2 text-green-600">🥗 ของแม่ (ส้มตำ)</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
           {menus.filter(m => m.kitchen === 'mom').map((menu) => (
-            <button key={menu.id} onClick={() => addToCart(menu)} className={`${menu.color} text-white font-bold text-2xl p-8 rounded-xl shadow-md active:scale-95 transition-transform`}>
-              {menu.name} <div className="text-lg mt-2 font-normal">{menu.price} ฿</div>
+            <button key={menu.id} onClick={() => addToCart(menu)} className={`${menu.color} text-white font-bold text-xl sm:text-2xl p-4 sm:p-8 rounded-xl shadow-md active:scale-95 transition-transform flex flex-col items-center justify-center`}>
+              <span>{menu.name}</span> 
+              <span className="text-sm sm:text-lg mt-1 font-normal">{menu.price} ฿</span>
             </button>
           ))}
         </div>
 
-        <h2 className="text-2xl font-bold mb-2 text-yellow-600">🍗 ของป้า (ปิ้งย่าง/ข้าว)</h2>
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <h2 className="text-xl font-bold mb-2 text-yellow-600">🍗 ของป้า (ปิ้งย่าง/ข้าว)</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
           {menus.filter(m => m.kitchen === 'aunt').map((menu) => (
-            <button key={menu.id} onClick={() => addToCart(menu)} className={`${menu.color} text-white font-bold text-2xl p-8 rounded-xl shadow-md active:scale-95 transition-transform text-black`}>
-              {menu.name} <div className="text-lg mt-2 font-normal">{menu.price} ฿</div>
+            <button key={menu.id} onClick={() => addToCart(menu)} className={`${menu.color} text-white font-bold text-xl sm:text-2xl p-4 sm:p-8 rounded-xl shadow-md active:scale-95 transition-transform text-black flex flex-col items-center justify-center`}>
+              <span>{menu.name}</span> 
+              <span className="text-sm sm:text-lg mt-1 font-normal">{menu.price} ฿</span>
             </button>
           ))}
         </div>
       </div>
 
-      <div className="w-1/3 bg-white p-6 shadow-xl flex flex-col h-full">
+      {/* โซนขวา: ตะกร้าและคิดเงิน */}
+      <div className="w-full lg:w-1/3 bg-white p-4 sm:p-6 shadow-xl flex flex-col border-t lg:border-t-0 lg:border-l">
         <div className="mb-4">
           <input 
-            type="text" placeholder="📍 ระบุเบอร์โต๊ะ หรือ พิมพ์ว่า ใส่ถุง" 
-            className="w-full text-2xl p-4 border-2 border-blue-400 rounded-lg focus:outline-none focus:border-blue-600 font-bold bg-blue-50 text-black"
+            type="text" placeholder="📍 ระบุเบอร์โต๊ะ หรือ ใส่ถุง" 
+            className="w-full text-xl sm:text-2xl p-3 sm:p-4 border-2 border-blue-400 rounded-lg focus:outline-none focus:border-blue-600 font-bold bg-blue-50 text-black"
             value={table} onChange={(e) => setTable(e.target.value)}
           />
         </div>
-        <h2 className="text-xl font-bold mb-2 text-gray-700">รายการอาหาร:</h2>
+        <h2 className="text-lg sm:text-xl font-bold mb-2 text-gray-700">รายการอาหาร:</h2>
         
-        <div className="flex-1 overflow-y-auto mb-4 bg-gray-50 rounded-lg p-2 border">
+        <div className="flex-1 overflow-y-auto mb-4 bg-gray-50 rounded-lg p-2 border max-h-60 lg:max-h-none">
           <ul className="space-y-3">
             {cart.map((item) => (
               <li key={item.cartId} className="flex flex-col border-b border-gray-200 pb-3 bg-white p-3 rounded shadow-sm">
-                <div className="flex justify-between items-center text-xl font-bold text-black">
+                <div className="flex justify-between items-center text-lg sm:text-xl font-bold text-black">
                   <div className="flex items-center gap-2">
-                    <button onClick={() => removeFromCart(item.cartId)} className="text-red-500 font-bold text-sm px-3 py-1 bg-red-100 rounded-full hover:bg-red-200">X</button>
+                    <button onClick={() => removeFromCart(item.cartId)} className="text-red-500 font-bold text-sm px-2 py-0.5 bg-red-100 rounded-full hover:bg-red-200">X</button>
                     <span>{item.name}</span>
                   </div>
                   <span className="text-blue-600">{item.price} ฿</span>
                 </div>
                 <input 
                   type="text" placeholder="หมายเหตุ: เผ็ดน้อย..." 
-                  className="mt-2 w-full p-2 border border-gray-300 rounded text-lg focus:outline-none focus:border-blue-500 text-black"
+                  className="mt-2 w-full p-2 border border-gray-300 rounded text-sm sm:text-lg focus:outline-none focus:border-blue-500 text-black"
                   value={item.note} onChange={(e) => updateNote(item.cartId, e.target.value)}
                 />
               </li>
@@ -248,11 +253,11 @@ export default function Home() {
           </ul>
         </div>
 
-        <div className="space-y-4 pt-4 border-t-2">
-          <div className="text-3xl font-bold text-right text-gray-800">รวม: {cart.reduce((sum, item) => sum + item.price, 0)} ฿</div>
-          <button onClick={sendToKitchen} className="w-full bg-blue-600 text-white font-bold text-2xl p-4 rounded-xl shadow-lg active:bg-blue-700 transition-colors">🔥 ส่งรายการให้พ่อ</button>
-          <button onClick={handleCheckout} className="w-full bg-black text-white font-bold text-xl p-4 rounded-xl shadow-lg active:bg-gray-800 transition-colors">💰 คิดเงิน (บันทึกลงระบบ)</button>
-          <button onClick={() => {setCart([]); setTable("");}} className="w-full text-red-500 font-bold p-2 hover:bg-red-50 rounded-lg transition-colors text-lg">ล้างรายการทั้งหมด</button>
+        <div className="space-y-3 pt-4 border-t-2">
+          <div className="text-2xl sm:text-3xl font-bold text-right text-gray-800">รวม: {cart.reduce((sum, item) => sum + item.price, 0)} ฿</div>
+          <button onClick={sendToKitchen} className="w-full bg-blue-600 text-white font-bold text-xl sm:text-2xl p-3 sm:p-4 rounded-xl shadow-lg active:bg-blue-700 transition-colors">🔥 ส่งรายการให้พ่อ</button>
+          <button onClick={handleCheckout} className="w-full bg-black text-white font-bold text-lg sm:text-xl p-3 sm:p-4 rounded-xl shadow-lg active:bg-gray-800 transition-colors">💰 คิดเงิน (บันทึกลงระบบ)</button>
+          <button onClick={() => {setCart([]); setTable("");}} className="w-full text-red-500 font-bold p-2 hover:bg-red-50 rounded-lg transition-colors text-base sm:text-lg">ล้างรายการทั้งหมด</button>
         </div>
       </div>
     </div>

@@ -5,9 +5,22 @@ import { io } from "socket.io-client";
 const socket = io("https://mom-pos-backend-api.onrender.com");
 
 export default function KitchenPage() {
-  const [orders, setOrders] = useState<any[]>([]);
+  // 💾 โหลดออเดอร์เก่าจากเครื่อง (localStorage) ทันทีที่เปิดหน้าเว็บ เพื่อกันหายเวลารีเฟรช
+  const [orders, setOrders] = useState<any[]>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("kitchen_orders");
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
+
   const [active, setActive] = useState(false);
   const [now, setNow] = useState(Date.now());
+
+  // 💾 บันทึกลงเครื่องอัตโนมัติทุกครั้งที่มีการเปลี่ยนแปลงออเดอร์
+  useEffect(() => {
+    localStorage.setItem("kitchen_orders", JSON.stringify(orders));
+  }, [orders]);
 
   useEffect(() => {
     const timer = setInterval(() => {
