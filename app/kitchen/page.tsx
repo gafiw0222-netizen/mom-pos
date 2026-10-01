@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
 
 const socket = io("https://mom-pos-backend-api.onrender.com");
@@ -9,6 +9,14 @@ export default function KitchenPage() {
   const [active, setActive] = useState(false);
   const [now, setNow] = useState(Date.now());
 
+  // 🔊 ใช้ useRef โหลดไฟล์ bell.mp3 ไว้ในความจำ เพื่อให้มือถือเล่นซ้ำได้ทุกออเดอร์
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    audioRef.current = new Audio('/bell.mp3');
+    audioRef.current.load();
+  }, []);
+
   useEffect(() => {
     const timer = setInterval(() => {
       setNow(Date.now());
@@ -16,31 +24,17 @@ export default function KitchenPage() {
     return () => clearInterval(timer);
   }, []);
 
-  // 🔊 ระบบสร้างเสียงแจ้งเตือนแบบบังคับเล่น (แก้ปัญหามือถือเสียงไม่ดังในออเดอร์ถัดไป)
+  // ฟังก์ชันเล่นเสียง bell.mp3 ด้วยความดังสุด และรีเซ็ตเวลาเพื่อให้เล่นซ้ำได้ตลอด
   const playSound = () => {
-    try {
-      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      
-      osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
-      osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.15); // A5
-      gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime ? gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5) : gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
-      
-      osc.start();
-      osc.stop(audioCtx.currentTime + 0.5);
-    } catch (e) {
-      console.log("Audio error", e);
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0; // รีเซบเพลงกลับมาเริ่มใหม่
+      audioRef.current.volume = 1.0;     // ความดัง 100%
+      audioRef.current.play().catch(e => {
+        console.log("Audio play blocked:", e);
+      });
     }
   };
 
-  // ดึงออเดอร์ค้างทำที่ยังไม่เสร็จจาก Backend ทันทีที่เปิดหน้าเว็บ
   const fetchKitchenOrders = async () => {
     try {
       const res = await fetch("https://mom-pos-backend-api.onrender.com/api/kitchen-orders");
@@ -54,13 +48,11 @@ export default function KitchenPage() {
   useEffect(() => {
     fetchKitchenOrders();
 
-    // ฟังสถานะออเดอร์ใหม่แบบเรียลไทม์
     socket.on("receive_order", (data) => {
       playSound();
       setOrders((prev) => [...prev, data]);
     });
 
-    // ฟังสถานะเมื่อออเดอร์ถูกลบ (ทำเสร็จแล้ว) จากเครื่องอื่น
     socket.on("order_removed", (id) => {
       setOrders((prev) => prev.filter(o => o.id !== id));
     });
@@ -72,7 +64,6 @@ export default function KitchenPage() {
   }, []);
 
   const removeOrder = async (id: string | number) => {
-    // ลบออกจากหน้าจอและแจ้งเครื่องอื่นๆ ผ่าน Socket
     setOrders(orders.filter((o) => o.id !== id));
     socket.emit("finish_order", id);
 
@@ -90,7 +81,16 @@ export default function KitchenPage() {
       <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white p-4 text-center">
         <h1 className="text-3xl sm:text-4xl font-bold mb-6">👨‍🍳 หน้าจอครัว (สำหรับพ่อ)</h1>
         <button 
-          onClick={() => { setActive(true); playSound(); }} 
+          onClick={() => { 
+            setActive(true); 
+            // ปลุกระบบเสียงตอนกดปุ่มเปิดครั้งแรกเพื่อให้มือถืออนุญาต
+            if (audioRef.current) {
+              audioRef.current.play().then(() => {
+                audioRef.current?.pause();
+                audioRef.current!.currentTime = 0;
+              }).catch(e => console.log(e));
+            }
+          }} 
           className="bg-green-600 text-white text-2xl sm:text-3xl font-black px-8 py-5 rounded-2xl shadow-2xl animate-pulse hover:bg-green-500">
           แตะเพื่อเปิดระบบ 👨‍🍳
         </button>
@@ -115,7 +115,7 @@ export default function KitchenPage() {
           {delayedOrders.length > 0 && (
             <div>
               <h2 className="text-xl sm:text-2xl font-black text-red-500 mb-4 bg-red-950/50 p-3 rounded-xl border border-red-600">
-                ⚠️ ออเดอร์ล่าช้าเกิน 15 นาทีแล้ว (ต้องรีบทำด่วน!)
+                ⚠️️ ออเดอร์ล่าช้าเกิน 15 นาทีแล้ว (ต้องรีบทำด่วน!)
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 {delayedOrders.map((order, idx) => {
