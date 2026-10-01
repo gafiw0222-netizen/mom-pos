@@ -31,7 +31,7 @@ export default function KitchenPage() {
       osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
       osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.15); // A5
       gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
-      gain.gain.exponentialRampYToValueAtTime ? gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5) : gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+      gain.gain.exponentialRampToValueAtTime ? gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5) : gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
       
       osc.start();
       osc.stop(audioCtx.currentTime + 0.5);
