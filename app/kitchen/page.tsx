@@ -9,7 +9,6 @@ export default function KitchenPage() {
   const [active, setActive] = useState(false);
   const [now, setNow] = useState(Date.now());
 
-  // ⏱️ อัปเดตเวลาปัจจุบันทุกๆ 10 วินาที เพื่อให้ตัวจับเวลาเดินสดๆ
   useEffect(() => {
     const timer = setInterval(() => {
       setNow(Date.now());
@@ -17,7 +16,6 @@ export default function KitchenPage() {
     return () => clearInterval(timer);
   }, []);
 
-  // 🔊 เล่นเสียงไฟล์ bell.mp3
   const playSound = () => {
     try {
       const audio = new Audio('/bell.mp3');
@@ -31,7 +29,6 @@ export default function KitchenPage() {
   useEffect(() => {
     socket.on("receive_order", (data) => {
       playSound();
-      // บันทึกเวลาที่ออเดอร์เข้ามา (receivedAt) เพื่อเอาไปคำนวณนาที
       const newOrder = { ...data, receivedAt: Date.now() };
       setOrders((prev) => [...prev, newOrder]);
     });
@@ -41,7 +38,7 @@ export default function KitchenPage() {
     };
   }, []);
 
-  const removeOrder = (id: string) => {
+  const removeOrder = (id: string | number) => {
     setOrders(orders.filter((o) => o.id !== id));
   };
 
@@ -58,10 +55,7 @@ export default function KitchenPage() {
     );
   }
 
-  // 📌 จัดเรียงออเดอร์: เอาอันที่มาเร็วก่อน (เก่าสุด) ไว้บนสุด
   const sortedOrders = [...orders].sort((a, b) => a.receivedAt - b.receivedAt);
-
-  // 🗂️ แยกหมวดหมู่: ปกติ (< 15 นาที) กับ ล่าช้า (>= 15 นาที)
   const delayedOrders = sortedOrders.filter(o => (now - o.receivedAt) >= 15 * 60 * 1000);
   const normalOrders = sortedOrders.filter(o => (now - o.receivedAt) < 15 * 60 * 1000);
 
@@ -75,7 +69,6 @@ export default function KitchenPage() {
         </div>
       ) : (
         <div className="space-y-10">
-          {/* 🔴 หมวดหมู่: ออเดอร์ที่เกิน 15 นาที (ช้า) */}
           {delayedOrders.length > 0 && (
             <div>
               <h2 className="text-2xl font-black text-red-500 mb-4 bg-red-950/50 p-3 rounded-xl border border-red-600">
@@ -119,7 +112,6 @@ export default function KitchenPage() {
             </div>
           )}
 
-          {/* 🟢 หมวดหมู่: ออเดอร์ปกติ (< 15 นาที) เรียงคิวตามลำดับ */}
           {normalOrders.length > 0 && (
             <div>
               <h2 className="text-2xl font-black text-green-400 mb-4 bg-green-950/50 p-3 rounded-xl border border-green-600">

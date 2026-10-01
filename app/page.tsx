@@ -22,7 +22,6 @@ export default function Home() {
   const [statusText, setStatusText] = useState("");
   const [toast, setToast] = useState<{ type: 'success' | 'error', message: string } | null>(null);
 
-  // 🔊 ระบบเสียงแจ้งเตือน
   const playSound = (type: 'success' | 'error') => {
     try {
       const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -69,7 +68,6 @@ export default function Home() {
     setCart(cart.map(item => item.cartId === cartId ? { ...item, note } : item));
   };
 
-  // 📤 ส่งออเดอร์ให้พ่อ พร้อมแนบ id และเวลา เพื่อให้ฝั่งพ่อใช้จัดการคิวได้
   const sendToKitchen = () => {
     if (!table) {
       showToast('error', "⚠️ แม่อย่าลืมใส่เบอร์โต๊ะนะ!");
@@ -88,7 +86,6 @@ export default function Home() {
     }
   };
 
-  // 💰 คิดเงินและบันทึกลง MongoDB
   const handleCheckout = async () => {
     if (cart.length === 0) {
       showToast('error', "⚠️ ยังไม่มีรายการอาหารในบิลนะแม่!");
