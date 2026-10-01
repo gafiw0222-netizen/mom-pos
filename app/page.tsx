@@ -22,7 +22,7 @@ export default function Home() {
   const [statusText, setStatusText] = useState("");
   const [toast, setToast] = useState<{ type: 'success' | 'error', message: string } | null>(null);
 
-  // 🔊 ระบบเสียงสังเคราะห์อัตโนมัติ (เสียงใสตอนสำเร็จ / เสียงต่ำตอนผิดพลาด)
+  // 🔊 ระบบเสียงแจ้งเตือน
   const playSound = (type: 'success' | 'error') => {
     try {
       const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -32,8 +32,8 @@ export default function Home() {
       gain.connect(audioCtx.destination);
 
       if (type === 'success') {
-        osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
-        osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.1); // A5
+        osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+        osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.1);
         gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
         osc.start();
@@ -69,6 +69,7 @@ export default function Home() {
     setCart(cart.map(item => item.cartId === cartId ? { ...item, note } : item));
   };
 
+  // 📤 ส่งออเดอร์ให้พ่อ พร้อมแนบ id และเวลา เพื่อให้ฝั่งพ่อใช้จัดการคิวได้
   const sendToKitchen = () => {
     if (!table) {
       showToast('error', "⚠️ แม่อย่าลืมใส่เบอร์โต๊ะนะ!");
@@ -76,20 +77,25 @@ export default function Home() {
     }
     const dadItems = cart.filter((item) => item.kitchen === "dad");
     if (dadItems.length > 0) {
-      socket.emit("send_to_kitchen", { table, items: dadItems });
+      socket.emit("send_to_kitchen", { 
+        id: Date.now(), 
+        table, 
+        items: dadItems 
+      });
       showToast('success', `🔥 ส่งออเดอร์ โต๊ะ ${table} ไปครัวพ่อแล้ว!`);
     } else {
       showToast('error', "บิลนี้ไม่มีเมนูของพ่อนะแม่");
     }
   };
 
+  // 💰 คิดเงินและบันทึกลง MongoDB
   const handleCheckout = async () => {
     if (cart.length === 0) {
       showToast('error', "⚠️ ยังไม่มีรายการอาหารในบิลนะแม่!");
       return;
     }
     if (!table) {
-      showToast('error', "⚠️️ แม่อย่าลืมใส่เบอร์โต๊ะก่อนคิดเงินนะ!");
+      showToast('error', "⚠️ แม่อย่าลืมใส่เบอร์โต๊ะก่อนคิดเงินนะ!");
       return;
     }
 
@@ -182,7 +188,7 @@ export default function Home() {
 
       <div className="w-2/3 p-4 overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-3xl font-extrabold text-blue-600">🍽️️ ระบบ POS ร้านอาหาร</h1>
+          <h1 className="text-3xl font-extrabold text-blue-600">🍽 ระบบ POS ร้านอาหาร</h1>
           <a href="/summary" target="_blank" className="bg-purple-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-purple-700 shadow">📊 ไปดูหน้ารวมยอดขาย</a>
         </div>
 
