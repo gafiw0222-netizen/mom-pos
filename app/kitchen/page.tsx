@@ -25,7 +25,6 @@ export default function KitchenPage() {
     return () => clearInterval(timer);
   }, []);
 
-  // 🔊 ระบบเสียง 2 ชั้น: เล่น bell.mp3 ถ้าไม่ได้ผลจะใช้เสียงสำรองทันที
   const playSound = () => {
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
@@ -39,7 +38,6 @@ export default function KitchenPage() {
     }
   };
 
-  // เสียงปี๊บสำรอง (รับประกันว่าดังแน่นอน 100%)
   const playBeepFallback = () => {
     try {
       const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -193,19 +191,22 @@ export default function KitchenPage() {
                             </button>
                           </div>
                           <ul className="space-y-3">
-                            {order.items.map((item: any, i: number) => (
-                              <li key={i} className="bg-gray-800 p-3 sm:p-4 rounded-xl flex flex-col">
-                                <div className="flex justify-between text-xl sm:text-2xl font-bold">
-                                  <span>• {item.name}</span>
-                                  <span className="text-green-400">{item.price} ฿</span>
-                                </div>
-                                {item.note && (
-                                  <span className="text-yellow-300 text-base sm:text-lg mt-1 bg-gray-700 px-3 py-1 rounded">
-                                    หมายเหตุ: {item.note}
-                                  </span>
-                                )}
-                              </li>
-                            ))}
+                            {order.items.map((item: any, i: number) => {
+                              const qty = item.quantity || 1;
+                              return (
+                                <li key={i} className="bg-gray-800 p-3 sm:p-4 rounded-xl flex flex-col">
+                                  <div className="flex justify-between text-xl sm:text-2xl font-bold">
+                                    <span>• {item.name} {qty > 1 && <span className="text-yellow-400 font-black">x{qty}</span>}</span>
+                                    <span className="text-green-400">{item.price * qty} ฿</span>
+                                  </div>
+                                  {item.note && (
+                                    <span className="text-yellow-300 text-base sm:text-lg mt-1 bg-gray-700 px-3 py-1 rounded">
+                                      หมายเหตุ: {item.note}
+                                    </span>
+                                  )}
+                                </li>
+                              );
+                            })}
                           </ul>
                         </div>
                       );
@@ -236,19 +237,22 @@ export default function KitchenPage() {
                             </button>
                           </div>
                           <ul className="space-y-3">
-                            {order.items.map((item: any, i: number) => (
-                              <li key={i} className="bg-gray-800 p-3 sm:p-4 rounded-xl flex flex-col">
-                                <div className="flex justify-between text-xl sm:text-2xl font-bold">
-                                  <span>• {item.name}</span>
-                                  <span className="text-green-400">{item.price} ฿</span>
-                                </div>
-                                {item.note && (
-                                  <span className="text-yellow-300 text-base sm:text-lg mt-1 bg-gray-700 px-3 py-1 rounded">
-                                    หมายเหตุ: {item.note}
-                                  </span>
-                                )}
-                              </li>
-                            ))}
+                            {order.items.map((item: any, i: number) => {
+                              const qty = item.quantity || 1;
+                              return (
+                                <li key={i} className="bg-gray-800 p-3 sm:p-4 rounded-xl flex flex-col">
+                                  <div className="flex justify-between text-xl sm:text-2xl font-bold">
+                                    <span>• {item.name} {qty > 1 && <span className="text-yellow-400 font-black">x{qty}</span>}</span>
+                                    <span className="text-green-400">{item.price * qty} ฿</span>
+                                  </div>
+                                  {item.note && (
+                                    <span className="text-yellow-300 text-base sm:text-lg mt-1 bg-gray-700 px-3 py-1 rounded">
+                                      หมายเหตุ: {item.note}
+                                    </span>
+                                  )}
+                                </li>
+                              );
+                            })}
                           </ul>
                         </div>
                       );
@@ -296,12 +300,15 @@ export default function KitchenPage() {
                     </button>
                   </div>
                   <ul className="space-y-2">
-                    {order.items.map((item: any, i: number) => (
-                      <li key={i} className="bg-gray-800/60 p-3 rounded-xl flex justify-between text-lg text-gray-300">
-                        <span>• {item.name}</span>
-                        <span className="text-green-400">{item.price} ฿</span>
-                      </li>
-                    ))}
+                    {order.items.map((item: any, i: number) => {
+                      const qty = item.quantity || 1;
+                      return (
+                        <li key={i} className="bg-gray-800/60 p-3 rounded-xl flex justify-between text-lg text-gray-300">
+                          <span>• {item.name} {qty > 1 && <span className="text-yellow-400 font-black">x{qty}</span>}</span>
+                          <span className="text-green-400">{item.price * qty} ฿</span>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               ))}
