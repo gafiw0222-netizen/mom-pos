@@ -25,6 +25,38 @@ export default function KitchenPage() {
     return () => clearInterval(timer);
   }, []);
 
+  // 🔔 1. ฟังก์ชันขออนุญาตแจ้งเตือน (เรียกตอนกดเข้าแอป)
+  const requestNotificationPermission = () => {
+    if ("Notification" in window) {
+      Notification.requestPermission().then(permission => {
+        if (permission === "granted") {
+          console.log("✅ อนุญาตการแจ้งเตือนแล้ว");
+        }
+      });
+    }
+  };
+
+  // 🔔 2. ฟังก์ชันเด้งแจ้งเตือนลงมาจากขอบจอ
+  const showPushNotification = (orderData: any) => {
+    if ("Notification" in window && Notification.permission === "granted") {
+      // เอาชื่อเมนูมาต่อกันให้เห็นในแจ้งเตือนเลย
+      const menuList = orderData.items.map((i: any) => `${i.name} x${i.quantity || 1}`).join(", ");
+      
+      const notification = new Notification(`🔥 ออเดอร์ใหม่ โต๊ะ: ${orderData.table}`, {
+        body: `เมนู: ${menuList}`,
+        icon: "https://cdn-icons-png.flaticon.com/512/3565/3565418.png", // ไอคอนกระทะเท่ๆ
+        vibrate: [200, 100, 200, 100, 200], // สั่นเตือน
+      });
+
+      // พอกดที่แจ้งเตือน ให้เด้งเปิดหน้าเว็บครัวขึ้นมา
+      notification.onclick = function() {
+        window.focus();
+        this.close();
+      };
+    }
+  };
+
+  // 🔊 ระบบเสียงดังลั่น
   const playSound = () => {
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
@@ -51,7 +83,7 @@ export default function KitchenPage() {
       
       osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
       osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.15);
-      gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.8, audioCtx.currentTime); // เร่งเสียงให้ดังขึ้น
       gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
       
       osc.start();
@@ -79,7 +111,8 @@ export default function KitchenPage() {
     fetchKitchenData();
 
     socket.on("receive_order", (data) => {
-      playSound();
+      playSound(); // เล่นเสียงดังๆ
+      showPushNotification(data); // เด้งแจ้งเตือนจากขอบจอ
       setOrders((prev) => [...prev, data]);
     });
 
@@ -125,11 +158,13 @@ export default function KitchenPage() {
         <button 
           onClick={() => { 
             setActive(true); 
+            requestNotificationPermission(); // ขออนุญาตเด้งแจ้งเตือนตอนกด
             playSound();
           }} 
           className="bg-green-600 text-white text-2xl sm:text-3xl font-black px-8 py-5 rounded-2xl shadow-2xl animate-pulse hover:bg-green-500">
-          แตะเพื่อเปิดระบบ 👨‍🍳
+          แตะเพื่อเปิดระบบ 👨‍‍🍳
         </button>
+        <p className="mt-6 text-gray-400 text-sm">⚠️ ถ้าระบบถามหาการแจ้งเตือน ให้กด <span className="text-white font-bold">"อนุญาต"</span> ด้วยนะครับ</p>
       </div>
     );
   }
