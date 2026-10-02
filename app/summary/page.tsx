@@ -1,18 +1,113 @@
 "use client";
 import { useEffect, useState } from "react";
 
-const presetMenus = [
-  { name: "ลาบหมู", price: 60, owner: "mom" },
-  { name: "ต้มแซ่บ", price: 80, owner: "mom" },
-  { name: "ตำไทย", price: 40, owner: "mom" },
-  { name: "ตำปูปลาร้า", price: 40, owner: "mom" },
-  { name: "คอหมูย่าง", price: 60, owner: "aunt" },
-  { name: "ข้าวเหนียว", price: 10, owner: "aunt" },
+// ดึงรายการเมนูทั้งหมดของร้านมาใช้ในหน้าแก้ไขบิล
+const allMenus = [
+  { name: "ตำปูปลาร้า", price: 40 },
+  { name: "ตำไทย", price: 50 },
+  { name: "ตำขนมจีน", price: 40 },
+  { name: "ตำซั่ว", price: 50 },
+  { name: "ตำปู", price: 50 },
+  { name: "ตำไทยไข่เค็ม", price: 60 },
+  { name: "ตำหอยดอง", price: 50 },
+  { name: "ตำถั่ว", price: 50 },
+  { name: "ตำโคราช", price: 50 },
+  { name: "ตำข้าวโพด", price: 50 },
+  { name: "ตำข้าวโพดไข่เค็ม", price: 60 },
+  { name: "ตำมะม่วง", price: 50 },
+  { name: "ตำกระท้อน", price: 50 },
+  { name: "ตำแตง", price: 40 },
+  { name: "ตำป่า", price: 60 },
+  { name: "ตำหมูยอ", price: 60 },
+  { name: "ตำแคบหมู", price: 60 },
+  { name: "ตำปูปลาร้าหอยเชอรี่", price: 60 },
+  { name: "ตำผลไม้", price: 60 },
+  { name: "ตำปูปลาร้ากุ้งสด", price: 80 },
+  { name: "ตำไทยกุ้งสด", price: 80 },
+  { name: "ขนมจีน", price: 10 },
+  { name: "ตำถาด", price: 150 },
+  { name: "ตำเส้นเล็ก", price: 50 },
+  { name: "ตำเส้นเล็กหมูยอ", price: 60 },
+  { name: "ตำคอหมูย่าง", price: 60 },
+  { name: "ตำเหลาทะเล", price: 100 },
+  { name: "เกาเหลาหมูยอ", price: 60 },
+  { name: "ต้มแซ่บหมู", price: 60 },
+  { name: "ต้มแซ่บเห็ด", price: 60 },
+  { name: "ต้มแซ่บไก่", price: 60 },
+  { name: "ต้มแซ่บปลากระพง", price: 70 },
+  { name: "ต้มแซ่บกระดูกอ่อน", price: 70 },
+  { name: "ต้มแซ่บทะเล", price: 80 },
+  { name: "ต้มยำหมู", price: 60 },
+  { name: "ต้มยำไก่", price: 60 },
+  { name: "ต้มยำปลากระพง", price: 70 },
+  { name: "ต้มยำกระดูกอ่อน", price: 70 },
+  { name: "ต้มยำทะเล", price: 80 },
+  { name: "ต้มยำรวมมิตร", price: 80 },
+  { name: "ยำวุ้นเส้น", price: 60 },
+  { name: "ยำหมูยอ", price: 60 },
+  { name: "ยำไข่เค็ม", price: 60 },
+  { name: "ยำวุ้นเส้นรวมมิตร", price: 70 },
+  { name: "ยำรวมมิตร", price: 70 },
+  { name: "ยำมาม่า", price: 70 },
+  { name: "ยำเล็บมือนาง", price: 70 },
+  { name: "ยำเส้นแก้ว", price: 80 },
+  { name: "ยำทะเล(กุ้ง,ปลาหมึก)", price: 80 },
+  { name: "ลาบเห็ด", price: 50 },
+  { name: "ก้อยหอย", price: 50 },
+  { name: "ซุปหน่อไม้", price: 50 },
+  { name: "ลาบหมู", price: 60 },
+  { name: "น้ำตกหมู", price: 60 },
+  { name: "ลาบเป็ด", price: 60 },
+  { name: "ตับหวานหมู", price: 60 },
+  { name: "ตับหวานเนื้อ", price: 70 },
+  { name: "ลาบวุ้นเส้น", price: 60 },
+  { name: "ลาบปลาดุก", price: 60 },
+  { name: "ก้อยหมู", price: 60 },
+  { name: "ลาบเนื้อ", price: 70 },
+  { name: "ก้อยเนื้อดิบ/สุก", price: 70 },
+  { name: "ลาบไก่", price: 60 },
+  { name: "ลาบปลาหมึก", price: 80 },
+  { name: "ลาบผ้าขี้ริ้ว", price: 70 },
+  { name: "ซอยจุ๊", price: 80 },
+  { name: "แกงเห็ด", price: 60 },
+  { name: "อ่อมหมู", price: 60 },
+  { name: "อ่อมไก่", price: 60 },
+  { name: "อ่อมปลากระพง", price: 70 },
+  { name: "อ่อมกระดูกอ่อน", price: 70 },
+  { name: "อ่อมเนื้อ", price: 70 },
+  { name: "หมี่ลวก", price: 10 },
+  { name: "วุ้นเส้นลวก", price: 10 },
+  { name: "เล็กลวก", price: 10 },
+  { name: "ม่าๆลวก", price: 10 },
+  { name: "เนื้อไก่", price: 10 },
+  { name: "หมูปิ้ง", price: 10 },
+  { name: "เครื่องในไก่", price: 10 },
+  { name: "ตูดไก่", price: 12 },
+  { name: "แหนม", price: 15 },
+  { name: "ปีกเต็ม", price: 20 },
+  { name: "ปีกกลาง", price: 20 },
+  { name: "หมูแดดเดียว", price: 20 },
+  { name: "เนื้อแดดเดียว", price: 20 },
+  { name: "ปลาดุกย่าง", price: 40 },
+  { name: "น่องติดสะโพก", price: 50 },
+  { name: "อกไก่ย่าง", price: 60 },
+  { name: "คอหมูย่าง", price: 70 },
+  { name: "ข้าวเหนียว", price: 10 },
+  { name: "ข้าวสวย", price: 10 },
+  { name: "น้ำเปล่าเล็ก", price: 10 },
+  { name: "น้ำเปล่าใหญ่", price: 15 },
+  { name: "โค้ก/เป๊ปซี่เล็ก", price: 25 },
+  { name: "โค้กใหญ่", price: 40 },
+  { name: "เป๊ปซี่ใหญ่", price: 45 },
+  { name: "เป๊ปซี่กลาง", price: 30 },
+  { name: "น้ำแข็งแก้ว", price: 2 },
+  { name: "น้ำแข็งถัง", price: 10 },
 ];
 
 export default function SummaryPage() {
   const [bills, setBills] = useState<any[]>([]);
   const [editingBill, setEditingBill] = useState<any>(null);
+  const [menuSearch, setMenuSearch] = useState("");
 
   const getTodayYYYYMMDD = () => {
     const d = new Date();
@@ -61,7 +156,7 @@ export default function SummaryPage() {
   };
 
   const addItemToEditing = (menu: any) => {
-    const newItems = [...editingBill.items, { ...menu, cartId: Date.now() }];
+    const newItems = [...editingBill.items, { ...menu, quantity: 1, cartId: Date.now() + Math.random() }];
     setEditingBill({ ...editingBill, items: newItems });
   };
 
@@ -101,15 +196,36 @@ export default function SummaryPage() {
   const totalAunt = filteredBills.reduce((sum, b) => sum + (b.auntTotal || 0), 0);
   const grandTotal = totalMom + totalAunt;
 
-  const editMomTotal = editingBill?.items?.filter((i: any) => i.owner === "mom").reduce((sum: number, i: any) => sum + Number(i.price), 0) || 0;
-  const editAuntTotal = editingBill?.items?.filter((i: any) => i.owner === "aunt").reduce((sum: number, i: any) => sum + Number(i.price), 0) || 0;
+  // คำนวณยอดชั่วคราวตอนกำลังแก้ใน Modal
+  const editMomTotal = editingBill?.items?.reduce((sum: number, i: any) => {
+    const qty = i.quantity || 1;
+    const price = Number(i.price) * qty;
+    if (i.name === "ลาบปลาดุก") return sum + (20 * qty);
+    if (i.kitchen === "aunt") return sum;
+    return sum + price;
+  }, 0) || 0;
+
+  const editAuntTotal = editingBill?.items?.reduce((sum: number, i: any) => {
+    const qty = i.quantity || 1;
+    const price = Number(i.price) * qty;
+    if (i.name === "ลาบปลาดุก") return sum + (40 * qty);
+    if (i.kitchen === "aunt") return sum + price;
+    return sum;
+  }, 0) || 0;
+
   const editGrandTotal = editMomTotal + editAuntTotal;
 
+  // กรองเมนูใน Modal แก้ไขตามช่องค้นหา
+  const filteredModalMenus = menuSearch.trim() !== ""
+    ? allMenus.filter(m => m.name.toLowerCase().includes(menuSearch.toLowerCase()))
+    : allMenus.slice(0, 12); // โชว์ 12 เมนูยอดฮิตก่อน ถ้าพิมพ์ค้นหาจะขึ้นทุกเมนู
+
   return (
-    <div className="p-4 sm:p-8 bg-gray-100 min-h-screen text-black relative">
+    <div className="p-4 sm:p-8 bg-gray-100 min-h-screen text-black relative select-none">
+      {/* 🛠️ MODAL หน้าต่างแก้ไขบิล */}
       {editingBill && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-          <div className="bg-white p-6 rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto border-4 border-blue-500">
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
+          <div className="bg-white p-6 rounded-3xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto border-4 border-blue-500">
             <h2 className="text-2xl font-black text-blue-600 mb-4">✏️ แก้ไขรายการบิล</h2>
             
             <div className="mb-4">
@@ -124,44 +240,57 @@ export default function SummaryPage() {
 
             <h3 className="font-bold text-gray-700 mb-2">รายการอาหารในบิลนี้ (กด X เพื่อลบ):</h3>
             <div className="bg-gray-50 p-3 rounded-xl border mb-4 max-h-48 overflow-y-auto space-y-2">
-              {editingBill.items.map((item: any, idx: number) => (
-                <div key={idx} className="flex justify-between items-center bg-white p-3 rounded-lg shadow-sm border">
-                  <div className="flex items-center gap-2">
-                    <button onClick={() => removeItemFromEditing(idx)} className="bg-red-100 text-red-600 font-bold px-2 py-1 rounded-full text-sm hover:bg-red-200">X</button>
-                    <span className="font-bold">{item.name}</span>
-                    <span className="text-xs text-gray-500">({item.owner === 'mom' ? '👩‍🦰 แม่' : '👵 ป้า'})</span>
+              {editingBill.items.map((item: any, idx: number) => {
+                const qty = item.quantity || 1;
+                return (
+                  <div key={idx} className="flex justify-between items-center bg-white p-3 rounded-lg shadow-2xs border">
+                    <div className="flex items-center gap-3">
+                      <button onClick={() => removeItemFromEditing(idx)} className="bg-red-100 text-red-600 font-bold px-3 py-1 rounded-full text-xs hover:bg-red-200">X ลบ</button>
+                      <span className="font-bold text-base">{item.name} {qty > 1 && <span className="text-blue-600">x{qty}</span>}</span>
+                    </div>
+                    <span className="font-bold text-blue-600 text-base">{item.price * qty} ฿</span>
                   </div>
-                  <span className="font-bold text-blue-600">{item.price} ฿</span>
-                </div>
-              ))}
+                );
+              })}
               {editingBill.items.length === 0 && (
                 <p className="text-center text-gray-400 py-4">ไม่มีเมนูในบิลนี้แล้ว</p>
               )}
             </div>
 
-            <h3 className="font-bold text-gray-700 mb-2">➕ เพิ่มเมนูอาหาร:</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-6">
-              {presetMenus.map((menu, idx) => (
+            {/* ค้นหาและเพิ่มเมนูทั้งหมดในร้าน */}
+            <h3 className="font-bold text-gray-700 mb-1">➕ เพิ่มเมนูอาหาร (ค้นหาทุกเมนูในร้าน):</h3>
+            <div className="mb-3">
+              <input 
+                type="text"
+                placeholder="🔍 พิมพ์ชื่อเมนูเพื่อค้นหา..."
+                value={menuSearch}
+                onChange={(e) => setMenuSearch(e.target.value)}
+                className="w-full p-2.5 border-2 border-blue-300 rounded-xl bg-white font-bold text-black focus:outline-none"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-6 max-h-48 overflow-y-auto p-1 bg-gray-50 rounded-xl border">
+              {filteredModalMenus.map((menu, idx) => (
                 <button 
                   key={idx} 
                   onClick={() => addItemToEditing(menu)}
-                  className="bg-gray-200 hover:bg-blue-100 p-2 rounded-xl text-sm font-bold border flex flex-col items-center">
-                  <span>{menu.name}</span>
-                  <span className="text-blue-600">{menu.price} ฿</span>
+                  className="bg-white hover:bg-blue-50 p-2.5 rounded-xl text-xs font-bold border flex flex-col items-center shadow-2xs">
+                  <span className="text-center">{menu.name}</span>
+                  <span className="text-blue-600 mt-1">{menu.price} ฿</span>
                 </button>
               ))}
             </div>
 
-            <div className="bg-blue-50 p-3 rounded-xl border border-blue-200 mb-6 flex flex-col sm:flex-row justify-between items-center font-bold text-base gap-1">
+            <div className="bg-blue-50 p-4 rounded-xl border border-blue-200 mb-6 flex justify-between items-center font-bold text-base">
               <span>ยอดใหม่: แม่ {editMomTotal}฿ | ป้า {editAuntTotal}฿</span>
               <span className="text-xl text-blue-700">รวม: {editGrandTotal} ฿</span>
             </div>
 
             <div className="flex gap-3">
-              <button onClick={saveEditedBill} className="flex-1 bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-700 shadow">
-                💾 บันทึก
+              <button onClick={saveEditedBill} className="flex-1 bg-green-600 text-white font-bold text-lg py-3 rounded-xl hover:bg-green-700 shadow">
+                💾 บันทึกการแก้ไข
               </button>
-              <button onClick={() => setEditingBill(null)} className="flex-1 bg-gray-400 text-white font-bold py-3 rounded-xl hover:bg-gray-500 shadow">
+              <button onClick={() => setEditingBill(null)} className="flex-1 bg-gray-400 text-white font-bold text-lg py-3 rounded-xl hover:bg-gray-500 shadow">
                 ยกเลิก
               </button>
             </div>
@@ -170,12 +299,12 @@ export default function SummaryPage() {
       )}
 
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-3">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center sm:text-left">📊 หน้าสรุปยอดขาย</h1>
-        <a href="/" className="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-blue-700 text-sm sm:text-base">🔙 กลับหน้าขาย</a>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">📊 หน้าสรุปยอดขาย (แก้ไขบิลได้)</h1>
+        <a href="/" className="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-blue-700">🔙 กลับไปหน้าขาย</a>
       </div>
 
       <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-md mb-6 flex flex-col sm:flex-row items-center gap-3 border">
-        <label className="text-lg font-bold text-gray-700">📅 เลือกวันที่:</label>
+        <label className="text-lg font-bold text-gray-700">📅 เลือกวันที่ต้องการดู:</label>
         <input 
           type="date" 
           value={selectedDate} 
@@ -183,12 +312,12 @@ export default function SummaryPage() {
           className="text-lg p-2.5 border-2 border-blue-400 rounded-xl font-bold bg-blue-50 text-black w-full sm:w-auto"
         />
         <button onClick={() => setSelectedDate(getTodayYYYYMMDD())} className="bg-gray-200 px-4 py-2.5 rounded-xl font-bold text-gray-700 hover:bg-gray-300 w-full sm:w-auto">
-          วันปัจจุบัน
+          กลับมาวันปัจจุบัน
         </button>
       </div>
 
       <div className="mb-8">
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-700 mb-3">💰 สรุปยอดวันที่: {selectedDate}</h2>
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-700 mb-3">💰 สรุปยอดขายประจำวันที่: {selectedDate}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-green-100 p-5 rounded-2xl shadow-md border border-green-300">
             <h3 className="text-lg font-bold text-green-700">👩‍🦰 ยอดของแม่</h3>
@@ -205,40 +334,53 @@ export default function SummaryPage() {
         </div>
       </div>
 
-      <h2 className="text-xl sm:text-2xl font-bold mb-4 text-gray-700">📜 รายการบิล</h2>
-      {/* ทำตารางให้เลื่อนขวาซ้ายได้บนมือถือ (overflow-x-auto) */}
+      <h2 className="text-xl sm:text-2xl font-bold mb-4 text-gray-700">📜 รายการบิลของวันที่ {selectedDate}</h2>
+      
+      {/* 📋 ตารางประวัติบิล จัดรูปแบบรายการอาหารให้อ่านง่าย เป็นระเบียบ */}
       <div className="bg-white rounded-2xl shadow-xl overflow-x-auto border">
-        <table className="w-full min-w-[650px] text-left border-collapse">
+        <table className="w-full min-w-[700px] text-left border-collapse">
           <thead>
-            <tr className="bg-gray-200 text-gray-700 text-base sm:text-lg">
-              <th className="p-3 sm:p-4">เวลา</th>
-              <th className="p-3 sm:p-4">โต๊ะ</th>
-              <th className="p-3 sm:p-4">รายการอาหาร</th>
-              <th className="p-3 sm:p-4">ยอดแม่</th>
-              <th className="p-3 sm:p-4">ยอดป้า</th>
-              <th className="p-3 sm:p-4">รวม</th>
-              <th className="p-3 sm:p-4 text-center">จัดการ</th>
+            <tr className="bg-gray-200 text-gray-700 text-base">
+              <th className="p-4 w-28">เวลา</th>
+              <th className="p-4 w-28">โต๊ะ</th>
+              <th className="p-4">รายการอาหาร (อ่านง่าย ชัดเจน)</th>
+              <th className="p-4 w-28">ยอดแม่</th>
+              <th className="p-4 w-28">ยอดป้า</th>
+              <th className="p-4 w-28">รวม</th>
+              <th className="p-4 text-center w-36">จัดการ</th>
             </tr>
           </thead>
           <tbody>
             {filteredBills.map((bill) => (
-              <tr key={bill._id} className="border-b hover:bg-gray-50 text-sm sm:text-base">
-                <td className="p-3 sm:p-4 text-gray-600 whitespace-nowrap">{new Date(bill.createdAt).toLocaleTimeString("th-TH")} น.</td>
-                <td className="p-3 sm:p-4 font-bold text-blue-600 whitespace-nowrap">โต๊ะ {bill.table}</td>
-                <td className="p-3 sm:p-4 text-gray-700 max-w-xs">
-                  {bill.items.map((i: any, idx: number) => (
-                    <span key={idx}>• {i.name} ({i.price}฿){idx < bill.items.length - 1 ? ", " : ""}</span>
-                  ))}
+              <tr key={bill._id} className="border-b hover:bg-gray-50 align-top text-sm">
+                <td className="p-4 text-gray-600 whitespace-nowrap">{new Date(bill.createdAt).toLocaleTimeString("th-TH")} น.</td>
+                <td className="p-4 font-bold text-blue-600 whitespace-nowrap">{bill.table}</td>
+                
+                {/* 📝 จัดรายการอาหารให้อยู่ในรูปแบบรายการย่อย อ่านง่าย ไม่ซ้อนกัน */}
+                <td className="p-4">
+                  <div className="space-y-1 bg-gray-50 p-2.5 rounded-xl border">
+                    {bill.items.map((i: any, idx: number) => {
+                      const qty = i.quantity || 1;
+                      return (
+                        <div key={idx} className="flex justify-between items-center text-gray-800 font-medium">
+                          <span>• {i.name} {qty > 1 && <strong className="text-blue-600">x{qty}</strong>} {i.note ? `(${i.note})` : ''}</span>
+                          <span className="text-gray-500 font-bold ml-2">{i.price * qty} ฿</span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </td>
-                <td className="p-3 sm:p-4 font-bold text-green-600 whitespace-nowrap">{bill.momTotal} ฿</td>
-                <td className="p-3 sm:p-4 font-bold text-yellow-600 whitespace-nowrap">{bill.auntTotal} ฿</td>
-                <td className="p-3 sm:p-4 font-bold text-gray-800 whitespace-nowrap">{bill.grandTotal} ฿</td>
-                <td className="p-3 sm:p-4 text-center whitespace-nowrap">
-                  <div className="flex justify-center gap-1 sm:gap-2">
-                    <button onClick={() => openEditModal(bill)} className="bg-yellow-500 text-white px-2.5 py-1 rounded-lg font-bold text-xs sm:text-sm hover:bg-yellow-600">
+
+                <td className="p-4 font-bold text-green-600 whitespace-nowrap">{bill.momTotal} ฿</td>
+                <td className="p-4 font-bold text-yellow-600 whitespace-nowrap">{bill.auntTotal} ฿</td>
+                <td className="p-4 font-bold text-gray-800 whitespace-nowrap">{bill.grandTotal} ฿</td>
+                
+                <td className="p-4 text-center whitespace-nowrap">
+                  <div className="flex justify-center gap-2">
+                    <button onClick={() => openEditModal(bill)} className="bg-yellow-500 text-white px-3 py-1.5 rounded-lg font-bold text-xs hover:bg-yellow-600 shadow-2xs">
                       ✏️ แก้ไข
                     </button>
-                    <button onClick={() => deleteBill(bill._id)} className="bg-red-500 text-white px-2.5 py-1 rounded-lg font-bold text-xs sm:text-sm hover:bg-red-600">
+                    <button onClick={() => deleteBill(bill._id)} className="bg-red-500 text-white px-3 py-1.5 rounded-lg font-bold text-xs hover:bg-red-600 shadow-2xs">
                       🗑️ ลบ
                     </button>
                   </div>
@@ -247,7 +389,7 @@ export default function SummaryPage() {
             ))}
             {filteredBills.length === 0 && (
               <tr>
-                <td colSpan={7} className="text-center p-8 text-gray-400 text-lg sm:text-xl">ไม่มีประวัติการขายในวันที่เลือกนี้</td>
+                <td colSpan={7} className="text-center p-8 text-gray-400 text-xl">ไม่มีประวัติการขายในวันที่เลือกนี้</td>
               </tr>
             )}
           </tbody>

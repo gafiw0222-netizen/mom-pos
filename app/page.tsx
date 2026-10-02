@@ -29,7 +29,7 @@ const allMenus = [
   { id: 121, name: "ตำไทยกุ้งสด", price: 80, owner: "mom", kitchen: "mom", category: "somtum", color: "bg-green-500" },
   { id: 122, name: "ขนมจีน", price: 10, owner: "mom", kitchen: "mom", category: "somtum", color: "bg-emerald-500" },
 
-  // --- 🔥 ของพ่อ (ต้ม, ยำ, ลาบ, ก้อย, อ่อม, เส้นลวก, ตำถาด/เส้นเล็ก/คอหมูย่าง/เกาเหลาหมูยอ) ---
+  // --- 🔥 ของพ่อ ---
   { id: 201, name: "ตำถาด", price: 150, owner: "mom", kitchen: "dad", category: "dad", subCat: "yum", color: "bg-red-600" },
   { id: 202, name: "ตำเส้นเล็ก", price: 50, owner: "mom", kitchen: "dad", category: "dad", subCat: "yum", color: "bg-red-600" },
   { id: 203, name: "ตำเส้นเล็กหมูยอ", price: 60, owner: "mom", kitchen: "dad", category: "dad", subCat: "yum", color: "bg-red-600" },
@@ -88,7 +88,7 @@ const allMenus = [
   { id: 253, name: "เล็กลวก", price: 10, owner: "mom", kitchen: "dad", category: "dad", subCat: "luak", color: "bg-amber-600" },
   { id: 254, name: "ม่าๆลวก", price: 10, owner: "mom", kitchen: "dad", category: "dad", subCat: "luak", color: "bg-amber-600" },
 
-  // --- 🍗 ของป้า (ปิ้งย่าง, ข้าว, น้ำ) ---
+  // --- 🍗 ของป้า ---
   { id: 301, name: "เนื้อไก่", price: 10, owner: "aunt", kitchen: "aunt", category: "aunt", color: "bg-amber-500" },
   { id: 302, name: "หมูปิ้ง", price: 10, owner: "aunt", kitchen: "aunt", category: "aunt", color: "bg-amber-500" },
   { id: 303, name: "เครื่องในไก่", price: 10, owner: "aunt", kitchen: "aunt", category: "aunt", color: "bg-amber-500" },
@@ -242,17 +242,32 @@ export default function Home() {
     }
   };
 
+  // 💰 ฟังก์ชันคิดเงิน พร้อมหลอดโหลดเปอร์เซ็นต์ (% progress bar)
   const handleCheckout = async () => {
     if (cart.length === 0) {
       showToast('error', "⚠️ ยังไม่มีรายการอาหารในบิลนะแม่!");
       return;
     }
     if (!table) {
-      showToast('error', "⚠️ แม่ยังไม่ได้เลือกโต๊ะก่อนคิดเงินนะ!");
+      showToast('error', "⚠️️ แม่ยังไม่ได้เลือกโต๊ะก่อนคิดเงินนะ!");
       return;
     }
 
+    const confirmPay = window.confirm(
+      `🧾 ยืนยันการรับเงินและบันทึกบิล (${table === 'ใส่ถุง' ? 'ใส่ถุง' : 'โต๊ะ ' + table})?`
+    );
+
+    if (!confirmPay) return;
+
+    setIsSaving(true);
+    setProgress(20);
+    setStatusText("กำลังเชื่อมต่อเซิร์ฟเวอร์...");
+
     try {
+      await new Promise((r) => setTimeout(r, 200));
+      setProgress(60);
+      setStatusText("กำลังบันทึกลงฐานข้อมูล...");
+
       const response = await fetch("https://mom-pos-backend-api.onrender.com/api/bills", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -263,14 +278,24 @@ export default function Home() {
         }),
       });
 
+      setProgress(90);
+      setStatusText("ตรวจสอบความถูกต้อง...");
+      await new Promise((r) => setTimeout(r, 200));
+
       if (response.ok) {
-        setCart([]);
-        setTable("");
-        showToast('success', "✅ บันทึกยอดขายสำเร็จ!");
+        setProgress(100);
+        setStatusText("บันทึกสำเร็จ!");
+        setTimeout(() => {
+          setIsSaving(false);
+          setCart([]);
+          setTable("");
+          showToast('success', "✅ บันทึกยอดขายสำเร็จ!");
+        }, 300);
       } else {
         throw new Error("Failed to save");
       }
     } catch (error) {
+      setIsSaving(false);
       showToast('error', "❌ บันทึกไม่สำเร็จ!");
     }
   };
@@ -294,7 +319,24 @@ export default function Home() {
         </div>
       )}
 
-      {/* โซนซ้าย: เมนูอาหาร */}
+      {/* ⏳ หลอดโหลดเปอร์เซ็นต์ (% progress bar) ตอนคิดเงิน */}
+      {isSaving && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
+          <div className="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm text-center border-4 border-blue-500">
+            <h3 className="text-2xl font-black text-blue-600 mb-4">⏳ กำลังบันทึกข้อมูล...</h3>
+            <div className="w-full bg-gray-200 rounded-full h-6 mb-4 overflow-hidden border">
+              <div 
+                className="bg-blue-600 h-6 transition-all duration-300 font-bold text-white text-sm flex items-center justify-center"
+                style={{ width: `${progress}%` }}
+              >
+                {progress}%
+              </div>
+            </div>
+            <p className="text-lg font-bold text-gray-600">{statusText}</p>
+          </div>
+        </div>
+      )}
+
       <div className="w-full lg:w-2/3 p-3 sm:p-4 overflow-y-auto">
         <div className="flex flex-col sm:flex-row justify-between items-center mb-3 gap-2">
           <h1 className="text-2xl font-extrabold text-blue-600">🍽 ส้มตำยโสธร (POS)</h1>
@@ -306,7 +348,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* 🔍 ช่องค้นหาด่วน */}
         <div className="mb-3">
           <input 
             type="text" 
@@ -317,7 +358,6 @@ export default function Home() {
           />
         </div>
 
-        {/* แท็บหมวดหมู่หลัก */}
         <div className="grid grid-cols-3 gap-2 mb-3">
           <button 
             onClick={() => { setActiveCategory('somtum'); setSearchQuery(''); }}
@@ -345,7 +385,6 @@ export default function Home() {
           </button>
         </div>
 
-        {/* 🔖 หมวดหมู่ย่อย (เฉพาะหน้าครัวพ่อ) */}
         {activeCategory === 'dad' && !searchQuery && (
           <div className="grid grid-cols-4 gap-1.5 mb-3 bg-red-950/10 p-2 rounded-xl border border-red-200">
             <button 
@@ -375,7 +414,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* รายการปุ่มเมนูอาหาร */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pb-10">
           {filteredMenus.map((menu) => (
             <button 
@@ -393,7 +431,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* โซนขวา: ตะกร้าและเลือกโต๊ะ */}
       <div className="w-full lg:w-1/3 bg-white p-4 shadow-xl flex flex-col border-t lg:border-t-0 lg:border-l">
         <h2 className="text-base font-bold text-gray-700 mb-2">📍 เลือกโต๊ะ หรือ ใส่ถุง:</h2>
         
@@ -415,7 +452,7 @@ export default function Home() {
 
         <div className="mb-3 bg-blue-50 p-2 rounded-xl border border-blue-200 text-center">
           <span className="text-sm text-gray-600">กำลังทำรายการของ: </span>
-          <span className="text-lg font-extrabold text-blue-600">{table ? (table === 'ใส่ถุง' ? '🛍️ ใส่ถุง' : `📍 โต๊ะ ${table}`) : '⚠️ ยังไม่ได้เลือกโต๊ะ'}</span>
+          <span className="text-lg font-extrabold text-blue-600">{table ? (table === 'ใส่ถุง' ? '🛍️️ ใส่ถุง' : `📍 โต๊ะ ${table}`) : '⚠️ ยังไม่ได้เลือกโต๊ะ'}</span>
         </div>
 
         <h2 className="text-base font-bold text-gray-700 mb-1">รายการอาหารในบิล:</h2>
@@ -457,7 +494,6 @@ export default function Home() {
           <button onClick={() => setCart([])} className="w-full text-red-500 font-bold py-1 hover:bg-red-50 rounded-lg text-sm">ล้างรายการทั้งหมด</button>
         </div>
 
-        {/* 🚀 ลายเซ็นเครดิตผู้พัฒนาสุดหล่อ */}
         <div className="text-center text-xs font-bold text-gray-400 mt-3 pt-2 border-t">
           🚀 พัฒนาโดย: ฟิวส์สุดหล่อ 😎
         </div>
