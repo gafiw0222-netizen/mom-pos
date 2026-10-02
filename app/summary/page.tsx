@@ -107,8 +107,8 @@ const allMenus = [
 
 export default function SummaryPage() {
   const [bills, setBills] = useState<any[]>([]);
-  const [selectedBill, setSelectedBill] = useState<any>(null); // สำหรับเปิดดูรายละเอียด
-  const [editingBill, setEditingBill] = useState<any>(null); // สำหรับหน้าแก้ไข
+  const [selectedBill, setSelectedBill] = useState<any>(null);
+  const [editingBill, setEditingBill] = useState<any>(null);
   const [menuSearch, setMenuSearch] = useState("");
 
   const getTodayYYYYMMDD = () => {
@@ -160,7 +160,33 @@ export default function SummaryPage() {
   };
 
   const addItemToEditing = (menu: any) => {
-    const newItems = [...editingBill.items, { ...menu, quantity: 1, cartId: Date.now() + Math.random() }];
+    setEditingBill((prev: any) => {
+      const existingIndex = prev.items.findIndex((item: any) => item.name === menu.name && !item.note);
+      if (existingIndex > -1) {
+        const newItems = [...prev.items];
+        newItems[existingIndex].quantity = (newItems[existingIndex].quantity || 1) + 1;
+        return { ...prev, items: newItems };
+      } else {
+        return { ...prev, items: [...prev.items, { ...menu, quantity: 1, cartId: Date.now() + Math.random() }] };
+      }
+    });
+  };
+
+  // ➕ เพิ่มจำนวนชิ้นในหน้าแก้ไข
+  const increaseEditQty = (index: number) => {
+    const newItems = [...editingBill.items];
+    newItems[index].quantity = (newItems[index].quantity || 1) + 1;
+    setEditingBill({ ...editingBill, items: newItems });
+  };
+
+  // ➖ ลดจำนวนชิ้นในหน้าแก้ไข
+  const decreaseEditQty = (index: number) => {
+    const newItems = [...editingBill.items];
+    if ((newItems[index].quantity || 1) > 1) {
+      newItems[index].quantity -= 1;
+    } else {
+      newItems.splice(index, 1);
+    }
     setEditingBill({ ...editingBill, items: newItems });
   };
 
@@ -245,7 +271,6 @@ export default function SummaryPage() {
   return (
     <div className="p-4 sm:p-8 bg-gray-100 min-h-screen text-black relative select-none">
       
-      {/* 👁️ MODAL หน้าต่างแสดงรายละเอียดบิลแบบเดี่ยว (สะอาด ไม่กินพื้นที่) */}
       {selectedBill && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
           <div className="bg-white p-6 rounded-3xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto border-4 border-blue-500">
@@ -293,7 +318,7 @@ export default function SummaryPage() {
         </div>
       )}
 
-      {/* ✏️ MODAL หน้าต่างแก้ไขบิล */}
+      {/* ✏️ MODAL แก้ไขบิล (พร้อมปุ่ม +/- ชิ้น) */}
       {editingBill && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
           <div className="bg-white p-6 rounded-3xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto border-4 border-blue-500">
@@ -314,17 +339,24 @@ export default function SummaryPage() {
               />
             </div>
 
-            <h3 className="font-bold text-gray-700 mb-2">รายการอาหารในบิลนี้ (กด X เพื่อลบ):</h3>
-            <div className="bg-gray-50 p-3 rounded-xl border mb-4 max-h-48 overflow-y-auto space-y-2">
+            <h3 className="font-bold text-gray-700 mb-2">รายการอาหารในบิลนี้ (ปรับจำนวน / ลบ):</h3>
+            <div className="bg-gray-50 p-3 rounded-xl border mb-4 max-h-52 overflow-y-auto space-y-2">
               {editingBill.items.map((item: any, idx: number) => {
                 const qty = item.quantity || 1;
                 return (
-                  <div key={idx} className="flex justify-between items-center bg-white p-3 rounded-lg shadow-2xs border">
-                    <div className="flex items-center gap-3">
-                      <button onClick={() => removeItemFromEditing(idx)} className="bg-red-100 text-red-600 font-bold px-3 py-1 rounded-full text-xs hover:bg-red-200">X ลบ</button>
-                      <span className="font-bold text-base">{item.name} {qty > 1 && <span className="text-blue-600">x{qty}</span>}</span>
+                  <div key={idx} className="flex justify-between items-center bg-white p-3 rounded-xl shadow-2xs border">
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => removeItemFromEditing(idx)} className="bg-red-100 text-red-600 font-bold px-2.5 py-1 rounded-full text-xs hover:bg-red-200">ลบ</button>
+                      <span className="font-bold text-base text-black">{item.name}</span>
                     </div>
-                    <span className="font-bold text-blue-600 text-base">{item.price * qty} ฿</span>
+
+                    {/* ➕ ปุ่มบวก ลบ และจำนวนชิ้นในหน้าแก้ไข */}
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => decreaseEditQty(idx)} className="bg-gray-200 hover:bg-gray-300 w-7 h-7 rounded-lg font-black text-lg flex items-center justify-center">-</button>
+                      <span className="text-lg font-black text-blue-600 w-6 text-center">{qty}</span>
+                      <button onClick={() => increaseEditQty(idx)} className="bg-gray-200 hover:bg-gray-300 w-7 h-7 rounded-lg font-black text-lg flex items-center justify-center">+</button>
+                      <span className="text-blue-600 ml-1 font-bold">{item.price * qty} ฿</span>
+                    </div>
                   </div>
                 );
               })}
@@ -408,7 +440,6 @@ export default function SummaryPage() {
 
       <h2 className="text-xl sm:text-2xl font-bold mb-4 text-gray-700">📜 รายการบิลของวันที่ {selectedDate}</h2>
       
-      {/* 📋 ตารางประวัติแบบใหม่: ไม่โชว์รายการอาหารรกๆ โชว์เฉพาะเวลา โต๊ะ และยอดเงิน ให้กดจิ้มเพื่อดูรายละเอียด */}
       <div className="bg-white rounded-2xl shadow-xl overflow-x-auto border">
         <table className="w-full min-w-[600px] text-left border-collapse">
           <thead>
