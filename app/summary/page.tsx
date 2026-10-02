@@ -1,9 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 
-// 📋 รายการเมนูทั้งหมดของร้าน พร้อมระบุครัว/เจ้าของให้ถูกต้อง (แก้ปัญหาเงินป้าไปเข้าแม่)
 const allMenus = [
-  // --- ของแม่ (kitchen: "mom") ---
   { name: "ตำปูปลาร้า", price: 40, kitchen: "mom" },
   { name: "ตำไทย", price: 50, kitchen: "mom" },
   { name: "ตำขนมจีน", price: 40, kitchen: "mom" },
@@ -27,7 +25,6 @@ const allMenus = [
   { name: "ตำไทยกุ้งสด", price: 80, kitchen: "mom" },
   { name: "ขนมจีน", price: 10, kitchen: "mom" },
 
-  // --- ของพ่อ (kitchen: "dad") ---
   { name: "ตำถาด", price: 150, kitchen: "dad" },
   { name: "ตำเส้นเล็ก", price: 50, kitchen: "dad" },
   { name: "ตำเส้นเล็กหมูยอ", price: 60, kitchen: "dad" },
@@ -83,7 +80,6 @@ const allMenus = [
   { name: "เล็กลวก", price: 10, kitchen: "dad" },
   { name: "ม่าๆลวก", price: 10, kitchen: "dad" },
 
-  // --- ของป้า (kitchen: "aunt") ---
   { name: "เนื้อไก่", price: 10, kitchen: "aunt" },
   { name: "หมูปิ้ง", price: 10, kitchen: "aunt" },
   { name: "เครื่องในไก่", price: 10, kitchen: "aunt" },
@@ -111,7 +107,8 @@ const allMenus = [
 
 export default function SummaryPage() {
   const [bills, setBills] = useState<any[]>([]);
-  const [editingBill, setEditingBill] = useState<any>(null);
+  const [selectedBill, setSelectedBill] = useState<any>(null); // สำหรับเปิดดูรายละเอียด
+  const [editingBill, setEditingBill] = useState<any>(null); // สำหรับหน้าแก้ไข
   const [menuSearch, setMenuSearch] = useState("");
 
   const getTodayYYYYMMDD = () => {
@@ -139,18 +136,20 @@ export default function SummaryPage() {
   }, []);
 
   const deleteBill = async (id: string) => {
-    if (confirm("⚠️️ ต้องการลบบิลนี้ใช่หรือไม่?")) {
+    if (confirm("⚠️ ต้องการลบบิลนี้ใช่หรือไม่?")) {
       const res = await fetch(`https://mom-pos-backend-api.onrender.com/api/bills/${id}`, {
         method: "DELETE"
       });
       if (res.ok) {
         alert("🗑️ ลบบิลเรียบร้อย");
+        setSelectedBill(null);
         fetchBills();
       }
     }
   };
 
   const openEditModal = (bill: any) => {
+    setSelectedBill(null);
     setEditingBill(JSON.parse(JSON.stringify(bill)));
   };
 
@@ -165,7 +164,6 @@ export default function SummaryPage() {
     setEditingBill({ ...editingBill, items: newItems });
   };
 
-  // ✨ เพิ่มเมนูพิเศษ (พิมพ์เอง) ในหน้าแก้ไขบิล
   const addCustomMenuEditing = () => {
     const customName = prompt("📝 พิมพ์ชื่อเมนูพิเศษ:");
     if (!customName || customName.trim() === "") return;
@@ -186,8 +184,7 @@ export default function SummaryPage() {
       cartId: Date.now() + Math.random()
     };
 
-    const newItems = [...editingBill.items, newItem];
-    setEditingBill({ ...editingBill, items: newItems });
+    setEditingBill({ ...editingBill, items: [...editingBill.items, newItem] });
   };
 
   const saveEditedBill = async () => {
@@ -226,7 +223,6 @@ export default function SummaryPage() {
   const totalAunt = filteredBills.reduce((sum, b) => sum + (b.auntTotal || 0), 0);
   const grandTotal = totalMom + totalAunt;
 
-  // คำนวณยอดชั่วคราวตอนกำลังแก้ใน Modal (รองรับลาบปลาดุก ป้า40/แม่20 และของป้า)
   const editMomTotal = editingBill?.items?.reduce((sum: number, i: any) => {
     const qty = i.quantity || 1;
     const price = Number(i.price) * qty;
@@ -244,13 +240,60 @@ export default function SummaryPage() {
   }, 0) || 0;
 
   const editGrandTotal = editMomTotal + editAuntTotal;
-
-  const filteredModalMenus = menuSearch.trim() !== ""
-    ? allMenus.filter(m => m.name.toLowerCase().includes(menuSearch.toLowerCase()))
-    : allMenus.slice(0, 12);
+  const filteredModalMenus = menuSearch.trim() !== "" ? allMenus.filter(m => m.name.toLowerCase().includes(menuSearch.toLowerCase())) : allMenus.slice(0, 12);
 
   return (
     <div className="p-4 sm:p-8 bg-gray-100 min-h-screen text-black relative select-none">
+      
+      {/* 👁️ MODAL หน้าต่างแสดงรายละเอียดบิลแบบเดี่ยว (สะอาด ไม่กินพื้นที่) */}
+      {selectedBill && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
+          <div className="bg-white p-6 rounded-3xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto border-4 border-blue-500">
+            <div className="flex justify-between items-center mb-4 border-b pb-3">
+              <div>
+                <h2 className="text-2xl font-black text-blue-600">📜 รายละเอียดบิล</h2>
+                <p className="text-sm text-gray-500">{new Date(selectedBill.createdAt).toLocaleTimeString("th-TH")} น.</p>
+              </div>
+              <span className="text-2xl font-black text-yellow-600 bg-yellow-50 px-3 py-1 rounded-xl border">{selectedBill.table}</span>
+            </div>
+
+            <div className="space-y-2 mb-6 max-h-60 overflow-y-auto bg-gray-50 p-3 rounded-2xl border">
+              {selectedBill.items.map((i: any, idx: number) => {
+                const qty = i.quantity || 1;
+                return (
+                  <div key={idx} className="flex justify-between items-center bg-white p-3 rounded-xl shadow-2xs border">
+                    <div>
+                      <span className="font-bold text-base text-gray-800">• {i.name}</span>
+                      {qty > 1 && <span className="text-blue-600 font-bold ml-1">x{qty}</span>}
+                      {i.note && <p className="text-xs text-orange-600 font-semibold">หมายเหตุ: {i.note}</p>}
+                    </div>
+                    <span className="font-bold text-gray-700">{i.price * qty} ฿</span>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="bg-blue-50 p-3 rounded-xl border border-blue-200 mb-6 flex justify-between font-bold text-base">
+              <span>ยอดแม่: {selectedBill.momTotal}฿ | ยอดป้า: {selectedBill.auntTotal}฿</span>
+              <span className="text-xl text-blue-700">รวม: {selectedBill.grandTotal} ฿</span>
+            </div>
+
+            <div className="flex gap-2">
+              <button onClick={() => openEditModal(selectedBill)} className="flex-1 bg-yellow-500 text-white font-bold py-3 rounded-xl hover:bg-yellow-600 shadow">
+                ✏️ แก้ไขบิลนี้
+              </button>
+              <button onClick={() => deleteBill(selectedBill._id)} className="flex-1 bg-red-500 text-white font-bold py-3 rounded-xl hover:bg-red-600 shadow">
+                🗑️ ลบบิล
+              </button>
+              <button onClick={() => setSelectedBill(null)} className="flex-1 bg-gray-400 text-white font-bold py-3 rounded-xl hover:bg-gray-500 shadow">
+                ปิด
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ✏️ MODAL หน้าต่างแก้ไขบิล */}
       {editingBill && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
           <div className="bg-white p-6 rounded-3xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto border-4 border-blue-500">
@@ -285,12 +328,9 @@ export default function SummaryPage() {
                   </div>
                 );
               })}
-              {editingBill.items.length === 0 && (
-                <p className="text-center text-gray-400 py-4">ไม่มีเมนูในบิลนี้แล้ว</p>
-              )}
             </div>
 
-            <h3 className="font-bold text-gray-700 mb-1">➕ เพิ่มเมนูอาหาร (ค้นหาทุกเมนูในร้าน):</h3>
+            <h3 className="font-bold text-gray-700 mb-1">➕ เพิ่มเมนูอาหาร:</h3>
             <div className="mb-3">
               <input 
                 type="text"
@@ -331,7 +371,7 @@ export default function SummaryPage() {
       )}
 
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-3">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">📊 หน้าสรุปยอดขาย (แก้ไขบิลได้)</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">📊 หน้าสรุปยอดขาย</h1>
         <a href="/" className="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-blue-700">🔙 กลับไปหน้าขาย</a>
       </div>
 
@@ -352,7 +392,7 @@ export default function SummaryPage() {
         <h2 className="text-xl sm:text-2xl font-bold text-gray-700 mb-3">💰 สรุปยอดขายประจำวันที่: {selectedDate}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-green-100 p-5 rounded-2xl shadow-md border border-green-300">
-            <h3 className="text-lg font-bold text-green-700">👩‍‍🦰 ยอดของแม่</h3>
+            <h3 className="text-lg font-bold text-green-700">👩‍🦰 ยอดของแม่</h3>
             <p className="text-3xl sm:text-4xl font-extrabold text-green-800 mt-1">{totalMom} ฿</p>
           </div>
           <div className="bg-yellow-100 p-5 rounded-2xl shadow-md border border-yellow-300">
@@ -368,58 +408,41 @@ export default function SummaryPage() {
 
       <h2 className="text-xl sm:text-2xl font-bold mb-4 text-gray-700">📜 รายการบิลของวันที่ {selectedDate}</h2>
       
+      {/* 📋 ตารางประวัติแบบใหม่: ไม่โชว์รายการอาหารรกๆ โชว์เฉพาะเวลา โต๊ะ และยอดเงิน ให้กดจิ้มเพื่อดูรายละเอียด */}
       <div className="bg-white rounded-2xl shadow-xl overflow-x-auto border">
-        <table className="w-full min-w-[700px] text-left border-collapse">
+        <table className="w-full min-w-[600px] text-left border-collapse">
           <thead>
             <tr className="bg-gray-200 text-gray-700 text-base">
-              <th className="p-4 w-28">เวลา</th>
-              <th className="p-4 w-28">โต๊ะ</th>
-              <th className="p-4">รายการอาหาร</th>
-              <th className="p-4 w-28">ยอดแม่</th>
-              <th className="p-4 w-28">ยอดป้า</th>
-              <th className="p-4 w-28">รวม</th>
-              <th className="p-4 text-center w-36">จัดการ</th>
+              <th className="p-4">เวลา</th>
+              <th className="p-4">โต๊ะ / ประเภท</th>
+              <th className="p-4">ยอดแม่</th>
+              <th className="p-4">ยอดป้า</th>
+              <th className="p-4">ยอดรวม</th>
+              <th className="p-4 text-center">ดูรายละเอียด / จัดการ</th>
             </tr>
           </thead>
           <tbody>
             {filteredBills.map((bill) => (
-              <tr key={bill._id} className="border-b hover:bg-gray-50 align-top text-sm">
+              <tr key={bill._id} className="border-b hover:bg-gray-50 text-base">
                 <td className="p-4 text-gray-600 whitespace-nowrap">{new Date(bill.createdAt).toLocaleTimeString("th-TH")} น.</td>
-                <td className="p-4 font-bold text-blue-600 whitespace-nowrap">{bill.table}</td>
-                
-                <td className="p-4">
-                  <div className="space-y-1 bg-gray-50 p-2.5 rounded-xl border">
-                    {bill.items.map((i: any, idx: number) => {
-                      const qty = i.quantity || 1;
-                      return (
-                        <div key={idx} className="flex justify-between items-center text-gray-800 font-medium">
-                          <span>• {i.name} {qty > 1 && <strong className="text-blue-600">x{qty}</strong>} {i.note ? `(${i.note})` : ''}</span>
-                          <span className="text-gray-500 font-bold ml-2">{i.price * qty} ฿</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </td>
-
+                <td className="p-4 font-extrabold text-blue-600 whitespace-nowrap">{bill.table}</td>
                 <td className="p-4 font-bold text-green-600 whitespace-nowrap">{bill.momTotal} ฿</td>
                 <td className="p-4 font-bold text-yellow-600 whitespace-nowrap">{bill.auntTotal} ฿</td>
                 <td className="p-4 font-bold text-gray-800 whitespace-nowrap">{bill.grandTotal} ฿</td>
                 
                 <td className="p-4 text-center whitespace-nowrap">
-                  <div className="flex justify-center gap-2">
-                    <button onClick={() => openEditModal(bill)} className="bg-yellow-500 text-white px-3 py-1.5 rounded-lg font-bold text-xs hover:bg-yellow-600 shadow-2xs">
-                      ✏️ แก้ไข
-                    </button>
-                    <button onClick={() => deleteBill(bill._id)} className="bg-red-500 text-white px-3 py-1.5 rounded-lg font-bold text-xs hover:bg-red-600 shadow-2xs">
-                      🗑️ ลบ
-                    </button>
-                  </div>
+                  <button 
+                    onClick={() => setSelectedBill(bill)} 
+                    className="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-blue-700 shadow"
+                  >
+                    🔍 ดูรายการอาหาร & จัดการบิล
+                  </button>
                 </td>
               </tr>
             ))}
             {filteredBills.length === 0 && (
               <tr>
-                <td colSpan={7} className="text-center p-8 text-gray-400 text-xl">ไม่มีประวัติการขายในวันที่เลือกนี้</td>
+                <td colSpan={6} className="text-center p-8 text-gray-400 text-xl">ไม่มีประวัติการขายในวันที่เลือกนี้</td>
               </tr>
             )}
           </tbody>
