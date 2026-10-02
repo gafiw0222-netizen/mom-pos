@@ -1,107 +1,112 @@
 "use client";
 import { useEffect, useState } from "react";
 
-// ดึงรายการเมนูทั้งหมดของร้านมาใช้ในหน้าแก้ไขบิล
+// 📋 รายการเมนูทั้งหมดของร้าน พร้อมระบุครัว/เจ้าของให้ถูกต้อง (แก้ปัญหาเงินป้าไปเข้าแม่)
 const allMenus = [
-  { name: "ตำปูปลาร้า", price: 40 },
-  { name: "ตำไทย", price: 50 },
-  { name: "ตำขนมจีน", price: 40 },
-  { name: "ตำซั่ว", price: 50 },
-  { name: "ตำปู", price: 50 },
-  { name: "ตำไทยไข่เค็ม", price: 60 },
-  { name: "ตำหอยดอง", price: 50 },
-  { name: "ตำถั่ว", price: 50 },
-  { name: "ตำโคราช", price: 50 },
-  { name: "ตำข้าวโพด", price: 50 },
-  { name: "ตำข้าวโพดไข่เค็ม", price: 60 },
-  { name: "ตำมะม่วง", price: 50 },
-  { name: "ตำกระท้อน", price: 50 },
-  { name: "ตำแตง", price: 40 },
-  { name: "ตำป่า", price: 60 },
-  { name: "ตำหมูยอ", price: 60 },
-  { name: "ตำแคบหมู", price: 60 },
-  { name: "ตำปูปลาร้าหอยเชอรี่", price: 60 },
-  { name: "ตำผลไม้", price: 60 },
-  { name: "ตำปูปลาร้ากุ้งสด", price: 80 },
-  { name: "ตำไทยกุ้งสด", price: 80 },
-  { name: "ขนมจีน", price: 10 },
-  { name: "ตำถาด", price: 150 },
-  { name: "ตำเส้นเล็ก", price: 50 },
-  { name: "ตำเส้นเล็กหมูยอ", price: 60 },
-  { name: "ตำคอหมูย่าง", price: 60 },
-  { name: "ตำเหลาทะเล", price: 100 },
-  { name: "เกาเหลาหมูยอ", price: 60 },
-  { name: "ต้มแซ่บหมู", price: 60 },
-  { name: "ต้มแซ่บเห็ด", price: 60 },
-  { name: "ต้มแซ่บไก่", price: 60 },
-  { name: "ต้มแซ่บปลากระพง", price: 70 },
-  { name: "ต้มแซ่บกระดูกอ่อน", price: 70 },
-  { name: "ต้มแซ่บทะเล", price: 80 },
-  { name: "ต้มยำหมู", price: 60 },
-  { name: "ต้มยำไก่", price: 60 },
-  { name: "ต้มยำปลากระพง", price: 70 },
-  { name: "ต้มยำกระดูกอ่อน", price: 70 },
-  { name: "ต้มยำทะเล", price: 80 },
-  { name: "ต้มยำรวมมิตร", price: 80 },
-  { name: "ยำวุ้นเส้น", price: 60 },
-  { name: "ยำหมูยอ", price: 60 },
-  { name: "ยำไข่เค็ม", price: 60 },
-  { name: "ยำวุ้นเส้นรวมมิตร", price: 70 },
-  { name: "ยำรวมมิตร", price: 70 },
-  { name: "ยำมาม่า", price: 70 },
-  { name: "ยำเล็บมือนาง", price: 70 },
-  { name: "ยำเส้นแก้ว", price: 80 },
-  { name: "ยำทะเล(กุ้ง,ปลาหมึก)", price: 80 },
-  { name: "ลาบเห็ด", price: 50 },
-  { name: "ก้อยหอย", price: 50 },
-  { name: "ซุปหน่อไม้", price: 50 },
-  { name: "ลาบหมู", price: 60 },
-  { name: "น้ำตกหมู", price: 60 },
-  { name: "ลาบเป็ด", price: 60 },
-  { name: "ตับหวานหมู", price: 60 },
-  { name: "ตับหวานเนื้อ", price: 70 },
-  { name: "ลาบวุ้นเส้น", price: 60 },
-  { name: "ลาบปลาดุก", price: 60 },
-  { name: "ก้อยหมู", price: 60 },
-  { name: "ลาบเนื้อ", price: 70 },
-  { name: "ก้อยเนื้อดิบ/สุก", price: 70 },
-  { name: "ลาบไก่", price: 60 },
-  { name: "ลาบปลาหมึก", price: 80 },
-  { name: "ลาบผ้าขี้ริ้ว", price: 70 },
-  { name: "ซอยจุ๊", price: 80 },
-  { name: "แกงเห็ด", price: 60 },
-  { name: "อ่อมหมู", price: 60 },
-  { name: "อ่อมไก่", price: 60 },
-  { name: "อ่อมปลากระพง", price: 70 },
-  { name: "อ่อมกระดูกอ่อน", price: 70 },
-  { name: "อ่อมเนื้อ", price: 70 },
-  { name: "หมี่ลวก", price: 10 },
-  { name: "วุ้นเส้นลวก", price: 10 },
-  { name: "เล็กลวก", price: 10 },
-  { name: "ม่าๆลวก", price: 10 },
-  { name: "เนื้อไก่", price: 10 },
-  { name: "หมูปิ้ง", price: 10 },
-  { name: "เครื่องในไก่", price: 10 },
-  { name: "ตูดไก่", price: 12 },
-  { name: "แหนม", price: 15 },
-  { name: "ปีกเต็ม", price: 20 },
-  { name: "ปีกกลาง", price: 20 },
-  { name: "หมูแดดเดียว", price: 20 },
-  { name: "เนื้อแดดเดียว", price: 20 },
-  { name: "ปลาดุกย่าง", price: 40 },
-  { name: "น่องติดสะโพก", price: 50 },
-  { name: "อกไก่ย่าง", price: 60 },
-  { name: "คอหมูย่าง", price: 70 },
-  { name: "ข้าวเหนียว", price: 10 },
-  { name: "ข้าวสวย", price: 10 },
-  { name: "น้ำเปล่าเล็ก", price: 10 },
-  { name: "น้ำเปล่าใหญ่", price: 15 },
-  { name: "โค้ก/เป๊ปซี่เล็ก", price: 25 },
-  { name: "โค้กใหญ่", price: 40 },
-  { name: "เป๊ปซี่ใหญ่", price: 45 },
-  { name: "เป๊ปซี่กลาง", price: 30 },
-  { name: "น้ำแข็งแก้ว", price: 2 },
-  { name: "น้ำแข็งถัง", price: 10 },
+  // --- ของแม่ (kitchen: "mom") ---
+  { name: "ตำปูปลาร้า", price: 40, kitchen: "mom" },
+  { name: "ตำไทย", price: 50, kitchen: "mom" },
+  { name: "ตำขนมจีน", price: 40, kitchen: "mom" },
+  { name: "ตำซั่ว", price: 50, kitchen: "mom" },
+  { name: "ตำปู", price: 50, kitchen: "mom" },
+  { name: "ตำไทยไข่เค็ม", price: 60, kitchen: "mom" },
+  { name: "ตำหอยดอง", price: 50, kitchen: "mom" },
+  { name: "ตำถั่ว", price: 50, kitchen: "mom" },
+  { name: "ตำโคราช", price: 50, kitchen: "mom" },
+  { name: "ตำข้าวโพด", price: 50, kitchen: "mom" },
+  { name: "ตำข้าวโพดไข่เค็ม", price: 60, kitchen: "mom" },
+  { name: "ตำมะม่วง", price: 50, kitchen: "mom" },
+  { name: "ตำกระท้อน", price: 50, kitchen: "mom" },
+  { name: "ตำแตง", price: 40, kitchen: "mom" },
+  { name: "ตำป่า", price: 60, kitchen: "mom" },
+  { name: "ตำหมูยอ", price: 60, kitchen: "mom" },
+  { name: "ตำแคบหมู", price: 60, kitchen: "mom" },
+  { name: "ตำปูปลาร้าหอยเชอรี่", price: 60, kitchen: "mom" },
+  { name: "ตำผลไม้", price: 60, kitchen: "mom" },
+  { name: "ตำปูปลาร้ากุ้งสด", price: 80, kitchen: "mom" },
+  { name: "ตำไทยกุ้งสด", price: 80, kitchen: "mom" },
+  { name: "ขนมจีน", price: 10, kitchen: "mom" },
+
+  // --- ของพ่อ (kitchen: "dad") ---
+  { name: "ตำถาด", price: 150, kitchen: "dad" },
+  { name: "ตำเส้นเล็ก", price: 50, kitchen: "dad" },
+  { name: "ตำเส้นเล็กหมูยอ", price: 60, kitchen: "dad" },
+  { name: "ตำคอหมูย่าง", price: 60, kitchen: "dad" },
+  { name: "ตำเหลาทะเล", price: 100, kitchen: "dad" },
+  { name: "เกาเหลาหมูยอ", price: 60, kitchen: "dad" },
+  { name: "ต้มแซ่บหมู", price: 60, kitchen: "dad" },
+  { name: "ต้มแซ่บเห็ด", price: 60, kitchen: "dad" },
+  { name: "ต้มแซ่บไก่", price: 60, kitchen: "dad" },
+  { name: "ต้มแซ่บปลากระพง", price: 70, kitchen: "dad" },
+  { name: "ต้มแซ่บกระดูกอ่อน", price: 70, kitchen: "dad" },
+  { name: "ต้มแซ่บทะเล", price: 80, kitchen: "dad" },
+  { name: "ต้มยำหมู", price: 60, kitchen: "dad" },
+  { name: "ต้มยำไก่", price: 60, kitchen: "dad" },
+  { name: "ต้มยำปลากระพง", price: 70, kitchen: "dad" },
+  { name: "ต้มยำกระดูกอ่อน", price: 70, kitchen: "dad" },
+  { name: "ต้มยำทะเล", price: 80, kitchen: "dad" },
+  { name: "ต้มยำรวมมิตร", price: 80, kitchen: "dad" },
+  { name: "ยำวุ้นเส้น", price: 60, kitchen: "dad" },
+  { name: "ยำหมูยอ", price: 60, kitchen: "dad" },
+  { name: "ยำไข่เค็ม", price: 60, kitchen: "dad" },
+  { name: "ยำวุ้นเส้นรวมมิตร", price: 70, kitchen: "dad" },
+  { name: "ยำรวมมิตร", price: 70, kitchen: "dad" },
+  { name: "ยำมาม่า", price: 70, kitchen: "dad" },
+  { name: "ยำเล็บมือนาง", price: 70, kitchen: "dad" },
+  { name: "ยำเส้นแก้ว", price: 80, kitchen: "dad" },
+  { name: "ยำทะเล(กุ้ง,ปลาหมึก)", price: 80, kitchen: "dad" },
+  { name: "ลาบเห็ด", price: 50, kitchen: "dad" },
+  { name: "ก้อยหอย", price: 50, kitchen: "dad" },
+  { name: "ซุปหน่อไม้", price: 50, kitchen: "dad" },
+  { name: "ลาบหมู", price: 60, kitchen: "dad" },
+  { name: "น้ำตกหมู", price: 60, kitchen: "dad" },
+  { name: "ลาบเป็ด", price: 60, kitchen: "dad" },
+  { name: "ตับหวานหมู", price: 60, kitchen: "dad" },
+  { name: "ตับหวานเนื้อ", price: 70, kitchen: "dad" },
+  { name: "ลาบวุ้นเส้น", price: 60, kitchen: "dad" },
+  { name: "ลาบปลาดุก", price: 60, kitchen: "dad" },
+  { name: "ก้อยหมู", price: 60, kitchen: "dad" },
+  { name: "ลาบเนื้อ", price: 70, kitchen: "dad" },
+  { name: "ก้อยเนื้อดิบ/สุก", price: 70, kitchen: "dad" },
+  { name: "ลาบไก่", price: 60, kitchen: "dad" },
+  { name: "ลาบปลาหมึก", price: 80, kitchen: "dad" },
+  { name: "ลาบผ้าขี้ริ้ว", price: 70, kitchen: "dad" },
+  { name: "ซอยจุ๊", price: 80, kitchen: "dad" },
+  { name: "แกงเห็ด", price: 60, kitchen: "dad" },
+  { name: "อ่อมหมู", price: 60, kitchen: "dad" },
+  { name: "อ่อมไก่", price: 60, kitchen: "dad" },
+  { name: "อ่อมปลากระพง", price: 70, kitchen: "dad" },
+  { name: "อ่อมกระดูกอ่อน", price: 70, kitchen: "dad" },
+  { name: "อ่อมเนื้อ", price: 70, kitchen: "dad" },
+  { name: "หมี่ลวก", price: 10, kitchen: "dad" },
+  { name: "วุ้นเส้นลวก", price: 10, kitchen: "dad" },
+  { name: "เล็กลวก", price: 10, kitchen: "dad" },
+  { name: "ม่าๆลวก", price: 10, kitchen: "dad" },
+
+  // --- ของป้า (kitchen: "aunt") ---
+  { name: "เนื้อไก่", price: 10, kitchen: "aunt" },
+  { name: "หมูปิ้ง", price: 10, kitchen: "aunt" },
+  { name: "เครื่องในไก่", price: 10, kitchen: "aunt" },
+  { name: "ตูดไก่", price: 12, kitchen: "aunt" },
+  { name: "แหนม", price: 15, kitchen: "aunt" },
+  { name: "ปีกเต็ม", price: 20, kitchen: "aunt" },
+  { name: "ปีกกลาง", price: 20, kitchen: "aunt" },
+  { name: "หมูแดดเดียว", price: 20, kitchen: "aunt" },
+  { name: "เนื้อแดดเดียว", price: 20, kitchen: "aunt" },
+  { name: "ปลาดุกย่าง", price: 40, kitchen: "aunt" },
+  { name: "น่องติดสะโพก", price: 50, kitchen: "aunt" },
+  { name: "อกไก่ย่าง", price: 60, kitchen: "aunt" },
+  { name: "คอหมูย่าง", price: 70, kitchen: "aunt" },
+  { name: "ข้าวเหนียว", price: 10, kitchen: "aunt" },
+  { name: "ข้าวสวย", price: 10, kitchen: "aunt" },
+  { name: "น้ำเปล่าเล็ก", price: 10, kitchen: "aunt" },
+  { name: "น้ำเปล่าใหญ่", price: 15, kitchen: "aunt" },
+  { name: "โค้ก/เป๊ปซี่เล็ก", price: 25, kitchen: "aunt" },
+  { name: "โค้กใหญ่", price: 40, kitchen: "aunt" },
+  { name: "เป๊ปซี่ใหญ่", price: 45, kitchen: "aunt" },
+  { name: "เป๊ปซี่กลาง", price: 30, kitchen: "aunt" },
+  { name: "น้ำแข็งแก้ว", price: 2, kitchen: "aunt" },
+  { name: "น้ำแข็งถัง", price: 10, kitchen: "aunt" },
 ];
 
 export default function SummaryPage() {
@@ -134,7 +139,7 @@ export default function SummaryPage() {
   }, []);
 
   const deleteBill = async (id: string) => {
-    if (confirm("⚠️ ต้องการลบบิลนี้ใช่หรือไม่?")) {
+    if (confirm("⚠️️ ต้องการลบบิลนี้ใช่หรือไม่?")) {
       const res = await fetch(`https://mom-pos-backend-api.onrender.com/api/bills/${id}`, {
         method: "DELETE"
       });
@@ -157,6 +162,31 @@ export default function SummaryPage() {
 
   const addItemToEditing = (menu: any) => {
     const newItems = [...editingBill.items, { ...menu, quantity: 1, cartId: Date.now() + Math.random() }];
+    setEditingBill({ ...editingBill, items: newItems });
+  };
+
+  // ✨ เพิ่มเมนูพิเศษ (พิมพ์เอง) ในหน้าแก้ไขบิล
+  const addCustomMenuEditing = () => {
+    const customName = prompt("📝 พิมพ์ชื่อเมนูพิเศษ:");
+    if (!customName || customName.trim() === "") return;
+
+    const customPriceStr = prompt(`💵 ใส่ราคาของ "${customName}" (บาท):`);
+    const customPrice = Number(customPriceStr);
+    if (isNaN(customPrice) || customPrice <= 0) {
+      alert("❌ กรุณาใส่ราคาเป็นตัวเลขที่ถูกต้อง");
+      return;
+    }
+
+    const newItem = {
+      name: `✨ ${customName.trim()}`,
+      price: customPrice,
+      kitchen: "dad",
+      quantity: 1,
+      note: "เมนูพิเศษ",
+      cartId: Date.now() + Math.random()
+    };
+
+    const newItems = [...editingBill.items, newItem];
     setEditingBill({ ...editingBill, items: newItems });
   };
 
@@ -196,7 +226,7 @@ export default function SummaryPage() {
   const totalAunt = filteredBills.reduce((sum, b) => sum + (b.auntTotal || 0), 0);
   const grandTotal = totalMom + totalAunt;
 
-  // คำนวณยอดชั่วคราวตอนกำลังแก้ใน Modal
+  // คำนวณยอดชั่วคราวตอนกำลังแก้ใน Modal (รองรับลาบปลาดุก ป้า40/แม่20 และของป้า)
   const editMomTotal = editingBill?.items?.reduce((sum: number, i: any) => {
     const qty = i.quantity || 1;
     const price = Number(i.price) * qty;
@@ -215,18 +245,21 @@ export default function SummaryPage() {
 
   const editGrandTotal = editMomTotal + editAuntTotal;
 
-  // กรองเมนูใน Modal แก้ไขตามช่องค้นหา
   const filteredModalMenus = menuSearch.trim() !== ""
     ? allMenus.filter(m => m.name.toLowerCase().includes(menuSearch.toLowerCase()))
-    : allMenus.slice(0, 12); // โชว์ 12 เมนูยอดฮิตก่อน ถ้าพิมพ์ค้นหาจะขึ้นทุกเมนู
+    : allMenus.slice(0, 12);
 
   return (
     <div className="p-4 sm:p-8 bg-gray-100 min-h-screen text-black relative select-none">
-      {/* 🛠️ MODAL หน้าต่างแก้ไขบิล */}
       {editingBill && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
           <div className="bg-white p-6 rounded-3xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto border-4 border-blue-500">
-            <h2 className="text-2xl font-black text-blue-600 mb-4">✏️ แก้ไขรายการบิล</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-black text-blue-600">✏️ แก้ไขรายการบิล</h2>
+              <button onClick={addCustomMenuEditing} className="bg-orange-500 text-white px-3 py-1.5 rounded-xl font-bold text-sm shadow hover:bg-orange-600">
+                ✨ เมนูพิเศษ (พิมพ์เอง)
+              </button>
+            </div>
             
             <div className="mb-4">
               <label className="font-bold text-gray-700 block mb-1">เบอร์โต๊ะ:</label>
@@ -257,7 +290,6 @@ export default function SummaryPage() {
               )}
             </div>
 
-            {/* ค้นหาและเพิ่มเมนูทั้งหมดในร้าน */}
             <h3 className="font-bold text-gray-700 mb-1">➕ เพิ่มเมนูอาหาร (ค้นหาทุกเมนูในร้าน):</h3>
             <div className="mb-3">
               <input 
@@ -320,7 +352,7 @@ export default function SummaryPage() {
         <h2 className="text-xl sm:text-2xl font-bold text-gray-700 mb-3">💰 สรุปยอดขายประจำวันที่: {selectedDate}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-green-100 p-5 rounded-2xl shadow-md border border-green-300">
-            <h3 className="text-lg font-bold text-green-700">👩‍🦰 ยอดของแม่</h3>
+            <h3 className="text-lg font-bold text-green-700">👩‍‍🦰 ยอดของแม่</h3>
             <p className="text-3xl sm:text-4xl font-extrabold text-green-800 mt-1">{totalMom} ฿</p>
           </div>
           <div className="bg-yellow-100 p-5 rounded-2xl shadow-md border border-yellow-300">
@@ -336,14 +368,13 @@ export default function SummaryPage() {
 
       <h2 className="text-xl sm:text-2xl font-bold mb-4 text-gray-700">📜 รายการบิลของวันที่ {selectedDate}</h2>
       
-      {/* 📋 ตารางประวัติบิล จัดรูปแบบรายการอาหารให้อ่านง่าย เป็นระเบียบ */}
       <div className="bg-white rounded-2xl shadow-xl overflow-x-auto border">
         <table className="w-full min-w-[700px] text-left border-collapse">
           <thead>
             <tr className="bg-gray-200 text-gray-700 text-base">
               <th className="p-4 w-28">เวลา</th>
               <th className="p-4 w-28">โต๊ะ</th>
-              <th className="p-4">รายการอาหาร (อ่านง่าย ชัดเจน)</th>
+              <th className="p-4">รายการอาหาร</th>
               <th className="p-4 w-28">ยอดแม่</th>
               <th className="p-4 w-28">ยอดป้า</th>
               <th className="p-4 w-28">รวม</th>
@@ -356,7 +387,6 @@ export default function SummaryPage() {
                 <td className="p-4 text-gray-600 whitespace-nowrap">{new Date(bill.createdAt).toLocaleTimeString("th-TH")} น.</td>
                 <td className="p-4 font-bold text-blue-600 whitespace-nowrap">{bill.table}</td>
                 
-                {/* 📝 จัดรายการอาหารให้อยู่ในรูปแบบรายการย่อย อ่านง่าย ไม่ซ้อนกัน */}
                 <td className="p-4">
                   <div className="space-y-1 bg-gray-50 p-2.5 rounded-xl border">
                     {bill.items.map((i: any, idx: number) => {
