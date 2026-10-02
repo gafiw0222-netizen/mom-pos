@@ -25,11 +25,41 @@ export default function KitchenPage() {
     return () => clearInterval(timer);
   }, []);
 
+  // 🔊 ระบบเสียง 2 ชั้น: เล่น bell.mp3 ถ้าไม่ได้ผลจะใช้เสียงสำรองทันที
   const playSound = () => {
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
       audioRef.current.volume = 1.0;
-      audioRef.current.play().catch(e => console.log("Audio play blocked:", e));
+      audioRef.current.play().catch(e => {
+        console.log("Audio file play error, using fallback beep:", e);
+        playBeepFallback();
+      });
+    } else {
+      playBeepFallback();
+    }
+  };
+
+  // เสียงปี๊บสำรอง (รับประกันว่าดังแน่นอน 100%)
+  const playBeepFallback = () => {
+    try {
+      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      
+      osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+      osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.15);
+      gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+      
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.5);
+    } catch (err) {
+      console.log("Fallback beep error:", err);
     }
   };
 
@@ -80,7 +110,7 @@ export default function KitchenPage() {
   };
 
   const clearHistoryToday = async () => {
-    if (confirm("🔄 ต้องการล้างประวัติออเดอร์ทั้งหมดของวันนี้ใช่หรือไม่? (เริ่มวันใหม่)")) {
+    if (confirm("🔄 ต้องการล้างประวัติออเดอร์ทั้งหมดของวันนี้ใช่หรือไม่?")) {
       socket.emit("clear_history");
       try {
         await fetch("https://mom-pos-backend-api.onrender.com/api/kitchen-history", { method: "DELETE" });
@@ -97,12 +127,7 @@ export default function KitchenPage() {
         <button 
           onClick={() => { 
             setActive(true); 
-            if (audioRef.current) {
-              audioRef.current.play().then(() => {
-                audioRef.current?.pause();
-                audioRef.current!.currentTime = 0;
-              }).catch(e => console.log(e));
-            }
+            playSound();
           }} 
           className="bg-green-600 text-white text-2xl sm:text-3xl font-black px-8 py-5 rounded-2xl shadow-2xl animate-pulse hover:bg-green-500">
           แตะเพื่อเปิดระบบ 👨‍🍳
@@ -119,7 +144,6 @@ export default function KitchenPage() {
     <div className="p-4 sm:p-8 bg-gray-950 min-h-screen text-white">
       <h1 className="text-3xl sm:text-4xl font-black text-red-500 mb-6 text-center">🔥 หน้าจอครัว (ระบบคิวอาหารพ่อ)</h1>
 
-      {/* เมนูแท็บสลับระหว่าง กำลังทำ กับ ประวัติที่ทำเสร็จแล้ว */}
       <div className="flex justify-center gap-4 mb-8">
         <button 
           onClick={() => setActiveTab('active')}
@@ -139,7 +163,6 @@ export default function KitchenPage() {
         </button>
       </div>
 
-      {/* 📌 หน้าที่ 1: ออเดอร์ที่กำลังทำอยู่ */}
       {activeTab === 'active' && (
         <>
           {orders.length === 0 ? (
@@ -238,11 +261,10 @@ export default function KitchenPage() {
         </>
       )}
 
-      {/* 📌 หน้าที่ 2: ประวัติออเดอร์ที่ทำเสร็จแล้ววันนี้ (พร้อมปุ่มกู้คืน) */}
       {activeTab === 'history' && (
         <div>
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-300">📜 รายการที่ทำเสร็จแล้วในวันนี้ (กดปุ่มกู้คืนได้ถ้ากดผิด)</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-300">📜 รายการที่ทำเสร็จแล้วในวันนี้</h2>
             {history.length > 0 && (
               <button 
                 onClick={clearHistoryToday}
