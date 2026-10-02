@@ -5,9 +5,9 @@ import { io } from "socket.io-client";
 const socket = io("https://mom-pos-backend-api.onrender.com");
 
 const allMenus = [
-  // --- 🥗 ของแม่ (ส้มตำทั่วไป) ---
+  // --- 🥗 ของแม่ (ส้มตำทั่วไป + ขนมจีน) ---
   { id: 101, name: "ตำปูปลาร้า", price: 40, owner: "mom", kitchen: "mom", category: "somtum", color: "bg-green-500" },
-  { id: 102, name: "ตำไทย", price: 50, owner: "mom", kitchen: "mom", category: "somtum", color: "bg-green-500" }, // แก้เป็น 50
+  { id: 102, name: "ตำไทย", price: 50, owner: "mom", kitchen: "mom", category: "somtum", color: "bg-green-500" },
   { id: 103, name: "ตำขนมจีน", price: 40, owner: "mom", kitchen: "mom", category: "somtum", color: "bg-green-500" },
   { id: 104, name: "ตำซั่ว", price: 50, owner: "mom", kitchen: "mom", category: "somtum", color: "bg-green-500" },
   { id: 105, name: "ตำปู", price: 50, owner: "mom", kitchen: "mom", category: "somtum", color: "bg-green-500" },
@@ -19,78 +19,76 @@ const allMenus = [
   { id: 111, name: "ตำข้าวโพดไข่เค็ม", price: 60, owner: "mom", kitchen: "mom", category: "somtum", color: "bg-green-500" },
   { id: 112, name: "ตำมะม่วง", price: 50, owner: "mom", kitchen: "mom", category: "somtum", color: "bg-green-500" },
   { id: 113, name: "ตำกระท้อน", price: 50, owner: "mom", kitchen: "mom", category: "somtum", color: "bg-green-500" },
-  { id: 114, name: "ตำแตง", price: 40, owner: "mom", kitchen: "mom", category: "somtum", color: "bg-green-500" }, // เพิ่มตำแตง 40
+  { id: 114, name: "ตำแตง", price: 40, owner: "mom", kitchen: "mom", category: "somtum", color: "bg-green-500" },
   { id: 115, name: "ตำป่า", price: 60, owner: "mom", kitchen: "mom", category: "somtum", color: "bg-green-500" },
   { id: 116, name: "ตำหมูยอ", price: 60, owner: "mom", kitchen: "mom", category: "somtum", color: "bg-green-500" },
   { id: 117, name: "ตำแคบหมู", price: 60, owner: "mom", kitchen: "mom", category: "somtum", color: "bg-green-500" },
   { id: 118, name: "ตำปูปลาร้าหอยเชอรี่", price: 60, owner: "mom", kitchen: "mom", category: "somtum", color: "bg-green-500" },
-  { id: 119, name: "เกาเหลาหมูยอ", price: 60, owner: "mom", kitchen: "mom", category: "somtum", color: "bg-green-500" },
-  { id: 120, name: "ตำผลไม้", price: 60, owner: "mom", kitchen: "mom", category: "somtum", color: "bg-green-500" },
-  { id: 121, name: "ตำปูปลาร้ากุ้งสด", price: 80, owner: "mom", kitchen: "mom", category: "somtum", color: "bg-green-500" },
-  { id: 122, name: "ตำไทยกุ้งสด", price: 80, owner: "mom", kitchen: "mom", category: "somtum", color: "bg-green-500" },
+  { id: 119, name: "ตำผลไม้", price: 60, owner: "mom", kitchen: "mom", category: "somtum", color: "bg-green-500" },
+  { id: 120, name: "ตำปูปลาร้ากุ้งสด", price: 80, owner: "mom", kitchen: "mom", category: "somtum", color: "bg-green-500" },
+  { id: 121, name: "ตำไทยกุ้งสด", price: 80, owner: "mom", kitchen: "mom", category: "somtum", color: "bg-green-500" },
+  { id: 122, name: "ขนมจีน", price: 10, owner: "mom", kitchen: "mom", category: "somtum", color: "bg-emerald-500" },
 
   // --- 🔥 ของพ่อ (ต้ม, ยำ, ลาบ, ก้อย, อ่อม, เส้นลวก, ตำถาด/เส้นเล็ก/คอหมูย่าง/เกาเหลาหมูยอ) ---
-  { id: 201, name: "ตำถาด", price: 150, owner: "mom", kitchen: "dad", category: "dad", color: "bg-red-600" },
-  { id: 202, name: "ตำเส้นเล็ก", price: 50, owner: "mom", kitchen: "dad", category: "dad", color: "bg-red-600" },
-  { id: 203, name: "ตำเส้นเล็กหมูยอ", price: 60, owner: "mom", kitchen: "dad", category: "dad", color: "bg-red-600" },
-  { id: 204, name: "ตำคอหมูย่าง", price: 60, owner: "mom", kitchen: "dad", category: "dad", color: "bg-red-600" },
-  { id: 205, name: "ตำเหลาทะเล", price: 100, owner: "mom", kitchen: "dad", category: "dad", color: "bg-red-600" },
-  { id: 206, name: "เกาเหลาหมูยอ", price: 60, owner: "mom", kitchen: "dad", category: "dad", color: "bg-red-600" },
+  { id: 201, name: "ตำถาด", price: 150, owner: "mom", kitchen: "dad", category: "dad", subCat: "yum", color: "bg-red-600" },
+  { id: 202, name: "ตำเส้นเล็ก", price: 50, owner: "mom", kitchen: "dad", category: "dad", subCat: "yum", color: "bg-red-600" },
+  { id: 203, name: "ตำเส้นเล็กหมูยอ", price: 60, owner: "mom", kitchen: "dad", category: "dad", subCat: "yum", color: "bg-red-600" },
+  { id: 204, name: "ตำคอหมูย่าง", price: 60, owner: "mom", kitchen: "dad", category: "dad", subCat: "yum", color: "bg-red-600" },
+  { id: 205, name: "ตำเหลาทะเล", price: 100, owner: "mom", kitchen: "dad", category: "dad", subCat: "yum", color: "bg-red-600" },
+  { id: 206, name: "เกาเหลาหมูยอ", price: 60, owner: "mom", kitchen: "dad", category: "dad", subCat: "yum", color: "bg-red-600" },
+  { id: 207, name: "ยำวุ้นเส้น", price: 60, owner: "mom", kitchen: "dad", category: "dad", subCat: "yum", color: "bg-emerald-600" },
+  { id: 208, name: "ยำหมูยอ", price: 60, owner: "mom", kitchen: "dad", category: "dad", subCat: "yum", color: "bg-emerald-600" },
+  { id: 209, name: "ยำไข่เค็ม", price: 60, owner: "mom", kitchen: "dad", category: "dad", subCat: "yum", color: "bg-emerald-600" },
+  { id: 210, name: "ยำวุ้นเส้นรวมมิตร", price: 70, owner: "mom", kitchen: "dad", category: "dad", subCat: "yum", color: "bg-emerald-600" },
+  { id: 211, name: "ยำรวมมิตร", price: 70, owner: "mom", kitchen: "dad", category: "dad", subCat: "yum", color: "bg-emerald-600" },
+  { id: 212, name: "ยำมาม่า", price: 70, owner: "mom", kitchen: "dad", category: "dad", subCat: "yum", color: "bg-emerald-600" },
+  { id: 213, name: "ยำเล็บมือนาง", price: 70, owner: "mom", kitchen: "dad", category: "dad", subCat: "yum", color: "bg-emerald-600" },
+  { id: 214, name: "ยำเส้นแก้ว", price: 80, owner: "mom", kitchen: "dad", category: "dad", subCat: "yum", color: "bg-emerald-600" },
+  { id: 215, name: "ยำทะเล(กุ้ง,ปลาหมึก)", price: 80, owner: "mom", kitchen: "dad", category: "dad", subCat: "yum", color: "bg-emerald-600" },
 
-  { id: 207, name: "ต้มแซ่บหมู", price: 60, owner: "mom", kitchen: "dad", category: "dad", color: "bg-red-600" },
-  { id: 208, name: "ต้มแซ่บเห็ด", price: 60, owner: "mom", kitchen: "dad", category: "dad", color: "bg-red-600" },
-  { id: 209, name: "ต้มแซ่บไก่", price: 60, owner: "mom", kitchen: "dad", category: "dad", color: "bg-red-600" },
-  { id: 210, name: "ต้มแซ่บปลากระพง", price: 70, owner: "mom", kitchen: "dad", category: "dad", color: "bg-red-600" },
-  { id: 211, name: "ต้มแซ่บกระดูกอ่อน", price: 70, owner: "mom", kitchen: "dad", category: "dad", color: "bg-red-600" },
-  { id: 212, name: "ต้มแซ่บทะเล", price: 80, owner: "mom", kitchen: "dad", category: "dad", color: "bg-red-600" },
-  { id: 213, name: "ต้มยำหมู", price: 60, owner: "mom", kitchen: "dad", category: "dad", color: "bg-red-600" },
-  { id: 214, name: "ต้มยำไก่", price: 60, owner: "mom", kitchen: "dad", category: "dad", color: "bg-red-600" },
-  { id: 215, name: "ต้มยำปลากระพง", price: 70, owner: "mom", kitchen: "dad", category: "dad", color: "bg-red-600" },
-  { id: 216, name: "ต้มยำกระดูกอ่อน", price: 70, owner: "mom", kitchen: "dad", category: "dad", color: "bg-red-600" },
-  { id: 217, name: "ต้มยำทะเล", price: 80, owner: "mom", kitchen: "dad", category: "dad", color: "bg-red-600" },
-  { id: 218, name: "ต้มยำรวมมิตร", price: 80, owner: "mom", kitchen: "dad", category: "dad", color: "bg-red-600" },
+  { id: 216, name: "ต้มแซ่บหมู", price: 60, owner: "mom", kitchen: "dad", category: "dad", subCat: "soup", color: "bg-red-600" },
+  { id: 217, name: "ต้มแซ่บเห็ด", price: 60, owner: "mom", kitchen: "dad", category: "dad", subCat: "soup", color: "bg-red-600" },
+  { id: 218, name: "ต้มแซ่บไก่", price: 60, owner: "mom", kitchen: "dad", category: "dad", subCat: "soup", color: "bg-red-600" },
+  { id: 219, name: "ต้มแซ่บปลากระพง", price: 70, owner: "mom", kitchen: "dad", category: "dad", subCat: "soup", color: "bg-red-600" },
+  { id: 220, name: "ต้มแซ่บกระดูกอ่อน", price: 70, owner: "mom", kitchen: "dad", category: "dad", subCat: "soup", color: "bg-red-600" },
+  { id: 221, name: "ต้มแซ่บทะเล", price: 80, owner: "mom", kitchen: "dad", category: "dad", subCat: "soup", color: "bg-red-600" },
+  { id: 222, name: "ต้มยำหมู", price: 60, owner: "mom", kitchen: "dad", category: "dad", subCat: "soup", color: "bg-red-600" },
+  { id: 223, name: "ต้มยำไก่", price: 60, owner: "mom", kitchen: "dad", category: "dad", subCat: "soup", color: "bg-red-600" },
+  { id: 224, name: "ต้มยำปลากระพง", price: 70, owner: "mom", kitchen: "dad", category: "dad", subCat: "soup", color: "bg-red-600" },
+  { id: 225, name: "ต้มยำกระดูกอ่อน", price: 70, owner: "mom", kitchen: "dad", category: "dad", subCat: "soup", color: "bg-red-600" },
+  { id: 226, name: "ต้มยำทะเล", price: 80, owner: "mom", kitchen: "dad", category: "dad", subCat: "soup", color: "bg-red-600" },
+  { id: 227, name: "ต้มยำรวมมิตร", price: 80, owner: "mom", kitchen: "dad", category: "dad", subCat: "soup", color: "bg-red-600" },
+  { id: 228, name: "แกงเห็ด", price: 60, owner: "mom", kitchen: "dad", category: "dad", subCat: "soup", color: "bg-orange-600" },
+  { id: 229, name: "อ่อมหมู", price: 60, owner: "mom", kitchen: "dad", category: "dad", subCat: "soup", color: "bg-orange-600" },
+  { id: 230, name: "อ่อมไก่", price: 60, owner: "mom", kitchen: "dad", category: "dad", subCat: "soup", color: "bg-orange-600" },
+  { id: 231, name: "อ่อมปลากระพง", price: 70, owner: "mom", kitchen: "dad", category: "dad", subCat: "soup", color: "bg-orange-600" },
+  { id: 232, name: "อ่อมกระดูกอ่อน", price: 70, owner: "mom", kitchen: "dad", category: "dad", subCat: "soup", color: "bg-orange-600" },
+  { id: 233, name: "อ่อมเนื้อ", price: 70, owner: "mom", kitchen: "dad", category: "dad", subCat: "soup", color: "bg-orange-600" },
 
-  { id: 219, name: "ยำวุ้นเส้น", price: 60, owner: "mom", kitchen: "dad", category: "dad", color: "bg-emerald-600" },
-  { id: 220, name: "ยำหมูยอ", price: 60, owner: "mom", kitchen: "dad", category: "dad", color: "bg-emerald-600" },
-  { id: 221, name: "ยำไข่เค็ม", price: 60, owner: "mom", kitchen: "dad", category: "dad", color: "bg-emerald-600" },
-  { id: 222, name: "ยำวุ้นเส้นรวมมิตร", price: 70, owner: "mom", kitchen: "dad", category: "dad", color: "bg-emerald-600" },
-  { id: 223, name: "ยำรวมมิตร", price: 70, owner: "mom", kitchen: "dad", category: "dad", color: "bg-emerald-600" },
-  { id: 224, name: "ยำมาม่า", price: 70, owner: "mom", kitchen: "dad", category: "dad", color: "bg-emerald-600" },
-  { id: 225, name: "ยำเล็บมือนาง", price: 70, owner: "mom", kitchen: "dad", category: "dad", color: "bg-emerald-600" },
-  { id: 226, name: "ยำเส้นแก้ว", price: 80, owner: "mom", kitchen: "dad", category: "dad", color: "bg-emerald-600" },
-  { id: 227, name: "ยำทะเล(กุ้ง,ปลาหมึก)", price: 80, owner: "mom", kitchen: "dad", category: "dad", color: "bg-emerald-600" },
+  { id: 234, name: "ลาบเห็ด", price: 50, owner: "mom", kitchen: "dad", category: "dad", subCat: "lab", color: "bg-rose-600" },
+  { id: 235, name: "ก้อยหอย", price: 50, owner: "mom", kitchen: "dad", category: "dad", subCat: "lab", color: "bg-rose-600" },
+  { id: 236, name: "ซุปหน่อไม้", price: 50, owner: "mom", kitchen: "dad", category: "dad", subCat: "lab", color: "bg-rose-600" },
+  { id: 237, name: "ลาบหมู", price: 60, owner: "mom", kitchen: "dad", category: "dad", subCat: "lab", color: "bg-rose-600" },
+  { id: 238, name: "น้ำตกหมู", price: 60, owner: "mom", kitchen: "dad", category: "dad", subCat: "lab", color: "bg-rose-600" },
+  { id: 239, name: "ลาบเป็ด", price: 60, owner: "mom", kitchen: "dad", category: "dad", subCat: "lab", color: "bg-rose-600" },
+  { id: 240, name: "ตับหวานหมู", price: 60, owner: "mom", kitchen: "dad", category: "dad", subCat: "lab", color: "bg-rose-600" },
+  { id: 241, name: "ตับหวานเนื้อ", price: 70, owner: "mom", kitchen: "dad", category: "dad", subCat: "lab", color: "bg-rose-600" },
+  { id: 242, name: "ลาบวุ้นเส้น", price: 60, owner: "mom", kitchen: "dad", category: "dad", subCat: "lab", color: "bg-rose-600" },
+  { id: 243, name: "ลาบปลาดุก", price: 60, owner: "mom", kitchen: "dad", category: "dad", subCat: "lab", color: "bg-rose-600" },
+  { id: 244, name: "ก้อยหมู", price: 60, owner: "mom", kitchen: "dad", category: "dad", subCat: "lab", color: "bg-rose-600" },
+  { id: 245, name: "ลาบเนื้อ", price: 70, owner: "mom", kitchen: "dad", category: "dad", subCat: "lab", color: "bg-rose-600" },
+  { id: 246, name: "ก้อยเนื้อดิบ/สุก", price: 70, owner: "mom", kitchen: "dad", category: "dad", subCat: "lab", color: "bg-rose-600" },
+  { id: 247, name: "ลาบไก่", price: 60, owner: "mom", kitchen: "dad", category: "dad", subCat: "lab", color: "bg-rose-600" },
+  { id: 248, name: "ลาบปลาหมึก", price: 80, owner: "mom", kitchen: "dad", category: "dad", subCat: "lab", color: "bg-rose-600" },
+  { id: 249, name: "ลาบผ้าขี้ริ้ว", price: 70, owner: "mom", kitchen: "dad", category: "dad", subCat: "lab", color: "bg-rose-600" },
+  { id: 250, name: "ซอยจุ๊", price: 80, owner: "mom", kitchen: "dad", category: "dad", subCat: "lab", color: "bg-rose-600" },
 
-  { id: 228, name: "ลาบเห็ด", price: 50, owner: "mom", kitchen: "dad", category: "dad", color: "bg-rose-600" },
-  { id: 229, name: "ก้อยหอย", price: 50, owner: "mom", kitchen: "dad", category: "dad", color: "bg-rose-600" },
-  { id: 230, name: "ซุปหน่อไม้", price: 50, owner: "mom", kitchen: "dad", category: "dad", color: "bg-rose-600" }, // แทนลาบห่อไก่
-  { id: 231, name: "ลาบหมู", price: 60, owner: "mom", kitchen: "dad", category: "dad", color: "bg-rose-600" },
-  { id: 232, name: "น้ำตกหมู", price: 60, owner: "mom", kitchen: "dad", category: "dad", color: "bg-rose-600" },
-  { id: 233, name: "ลาบเป็ด", price: 60, owner: "mom", kitchen: "dad", category: "dad", color: "bg-rose-600" },
-  { id: 234, name: "ตับหวานหมู", price: 60, owner: "mom", kitchen: "dad", category: "dad", color: "bg-rose-600" },
-  { id: 235, name: "ตับหวานเนื้อ", price: 70, owner: "mom", kitchen: "dad", category: "dad", color: "bg-rose-600" },
-  { id: 236, name: "ลาบวุ้นเส้น", price: 60, owner: "mom", kitchen: "dad", category: "dad", color: "bg-rose-600" },
-  { id: 237, name: "ลาบปลาดุก", price: 60, owner: "mom", kitchen: "dad", category: "dad", color: "bg-rose-600" }, // ลาบปลาดุก 60 (ป้า 40 / แม่ 20)
-  { id: 238, name: "ก้อยหมู", price: 60, owner: "mom", kitchen: "dad", category: "dad", color: "bg-rose-600" }, // แก้จากก้อยดิบ/สุก เป็นก้อยหมู 60
-  { id: 239, name: "ลาบเนื้อ", price: 70, owner: "mom", kitchen: "dad", category: "dad", color: "bg-rose-600" },
-  { id: 240, name: "ก้อยเนื้อดิบ/สุก", price: 70, owner: "mom", kitchen: "dad", category: "dad", color: "bg-rose-600" },
-  { id: 241, name: "ลาบไก่", price: 60, owner: "mom", kitchen: "dad", category: "dad", color: "bg-rose-600" },
-  { id: 242, name: "ลาบปลาหมึก", price: 80, owner: "mom", kitchen: "dad", category: "dad", color: "bg-rose-600" },
-  { id: 243, name: "ลาบผ้าขี้ริ้ว", price: 70, owner: "mom", kitchen: "dad", category: "dad", color: "bg-rose-600" },
-  { id: 244, name: "ซอยจุ๊", price: 80, owner: "mom", kitchen: "dad", category: "dad", color: "bg-rose-600" },
+  { id: 251, name: "หมี่ลวก", price: 10, owner: "mom", kitchen: "dad", category: "dad", subCat: "luak", color: "bg-amber-600" },
+  { id: 252, name: "วุ้นเส้นลวก", price: 10, owner: "mom", kitchen: "dad", category: "dad", subCat: "luak", color: "bg-amber-600" },
+  { id: 253, name: "เล็กลวก", price: 10, owner: "mom", kitchen: "dad", category: "dad", subCat: "luak", color: "bg-amber-600" },
+  { id: 254, name: "ม่าๆลวก", price: 10, owner: "mom", kitchen: "dad", category: "dad", subCat: "luak", color: "bg-amber-600" },
 
-  { id: 245, name: "แกงเห็ด", price: 60, owner: "mom", kitchen: "dad", category: "dad", color: "bg-orange-600" },
-  { id: 246, name: "อ่อมหมู", price: 60, owner: "mom", kitchen: "dad", category: "dad", color: "bg-orange-600" },
-  { id: 247, name: "อ่อมไก่", price: 60, owner: "mom", kitchen: "dad", category: "dad", color: "bg-orange-600" },
-  { id: 248, name: "อ่อมปลากระพง", price: 70, owner: "mom", kitchen: "dad", category: "dad", color: "bg-orange-600" },
-  { id: 249, name: "อ่อมกระดูกอ่อน", price: 70, owner: "mom", kitchen: "dad", category: "dad", color: "bg-orange-600" },
-  { id: 250, name: "อ่อมเนื้อ", price: 70, owner: "mom", kitchen: "dad", category: "dad", color: "bg-orange-600" },
-
-  { id: 251, name: "หมี่ลวก", price: 10, owner: "mom", kitchen: "dad", category: "dad", color: "bg-amber-600" },
-  { id: 252, name: "วุ้นเส้นลวก", price: 10, owner: "mom", kitchen: "dad", category: "dad", color: "bg-amber-600" },
-  { id: 253, name: "เล็กลวก", price: 10, owner: "mom", kitchen: "dad", category: "dad", color: "bg-amber-600" },
-  { id: 254, name: "ม่าๆลวก", price: 10, owner: "mom", kitchen: "dad", category: "dad", color: "bg-amber-600" },
-
-  // --- 🍗 ของป้า (ปิ้งย่าง, ข้าว, ขนมจีน, น้ำ) ---
+  // --- 🍗 ของป้า (ปิ้งย่าง, ข้าว, น้ำ) ---
   { id: 301, name: "เนื้อไก่", price: 10, owner: "aunt", kitchen: "aunt", category: "aunt", color: "bg-amber-500" },
   { id: 302, name: "หมูปิ้ง", price: 10, owner: "aunt", kitchen: "aunt", category: "aunt", color: "bg-amber-500" },
   { id: 303, name: "เครื่องในไก่", price: 10, owner: "aunt", kitchen: "aunt", category: "aunt", color: "bg-amber-500" },
@@ -107,7 +105,6 @@ const allMenus = [
 
   { id: 314, name: "ข้าวเหนียว", price: 10, owner: "aunt", kitchen: "aunt", category: "aunt", color: "bg-yellow-600" },
   { id: 315, name: "ข้าวสวย", price: 10, owner: "aunt", kitchen: "aunt", category: "aunt", color: "bg-yellow-600" },
-  { id: 316, name: "ขนมจีน", price: 10, owner: "aunt", kitchen: "aunt", category: "aunt", color: "bg-yellow-600" },
 
   { id: 317, name: "น้ำเปล่าเล็ก", price: 10, owner: "aunt", kitchen: "aunt", category: "aunt", color: "bg-blue-500" },
   { id: 318, name: "น้ำเปล่าใหญ่", price: 15, owner: "aunt", kitchen: "aunt", category: "aunt", color: "bg-blue-500" },
@@ -125,6 +122,8 @@ export default function Home() {
   const [cart, setCart] = useState<any[]>([]);
   const [table, setTable] = useState("");
   const [activeCategory, setActiveCategory] = useState<'somtum' | 'dad' | 'aunt'>('somtum');
+  const [activeSubCat, setActiveSubCat] = useState<string>('yum');
+  const [searchQuery, setSearchQuery] = useState('');
   
   const [isSaving, setIsSaving] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -253,40 +252,6 @@ export default function Home() {
       return;
     }
 
-    let momTotal = 0;
-    let auntTotal = 0;
-
-    cart.forEach(item => {
-      const qty = item.quantity || 1;
-      const itemTotal = item.price * qty;
-      if (item.name === "ลาบปลาดุก") {
-        auntTotal += 40 * qty;
-        momTotal += 20 * qty;
-      } else if (item.kitchen === "aunt") {
-        auntTotal += itemTotal;
-      } else {
-        momTotal += itemTotal;
-      }
-    });
-
-    const grandTotal = momTotal + auntTotal;
-
-    const confirmPay = window.confirm(
-      `🧾 สรุปยอดเงิน (${table === 'ใส่ถุง' ? 'ใส่ถุง' : 'โต๊ะ ' + table})\n` +
-      `----------------------------------\n` +
-      `👩‍🦰 ยอดของแม่: ${momTotal} ฿\n` +
-      `👵 ยอดของป้า: ${auntTotal} ฿\n` +
-      `----------------------------------\n` +
-      `💰 ยอดรวมทั้งสิ้น: ${grandTotal} ฿\n\n` +
-      `ยืนยันการรับเงินและบันทึกบิลนี้?`
-    );
-
-    if (!confirmPay) return;
-
-    setIsSaving(true);
-    setProgress(30);
-    setStatusText("กำลังบันทึกลงระบบ...");
-
     try {
       const response = await fetch("https://mom-pos-backend-api.onrender.com/api/bills", {
         method: "POST",
@@ -298,24 +263,26 @@ export default function Home() {
         }),
       });
 
-      setProgress(100);
-      setStatusText("บันทึกสำเร็จ!");
-
       if (response.ok) {
-        setTimeout(() => {
-          setIsSaving(false);
-          setCart([]);
-          setTable("");
-          showToast('success', "✅ บันทึกยอดขายสำเร็จ!");
-        }, 200);
+        setCart([]);
+        setTable("");
+        showToast('success', "✅ บันทึกยอดขายสำเร็จ!");
       } else {
         throw new Error("Failed to save");
       }
     } catch (error) {
-      setIsSaving(false);
       showToast('error', "❌ บันทึกไม่สำเร็จ!");
     }
   };
+
+  const filteredMenus = searchQuery.trim() !== ""
+    ? allMenus.filter(m => m.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    : allMenus.filter(m => {
+        if (activeCategory === 'dad') {
+          return m.category === 'dad' && m.subCat === activeSubCat;
+        }
+        return m.category === activeCategory;
+      });
 
   return (
     <div className="flex flex-col lg:flex-row min-h-screen bg-gray-100 relative select-none">
@@ -327,60 +294,90 @@ export default function Home() {
         </div>
       )}
 
-      {isSaving && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
-          <div className="bg-white p-6 rounded-3xl shadow-2xl w-full max-w-xs text-center border-4 border-blue-500">
-            <h3 className="text-xl font-black text-blue-600 mb-3">⏳ กำลังบันทึก...</h3>
-            <div className="w-full bg-gray-200 rounded-full h-5 mb-3 overflow-hidden border">
-              <div className="bg-blue-600 h-5 font-bold text-white text-xs flex items-center justify-center" style={{ width: `${progress}%` }}>
-                {progress}%
-              </div>
-            </div>
-            <p className="text-base font-bold text-gray-600">{statusText}</p>
-          </div>
-        </div>
-      )}
-
+      {/* โซนซ้าย: เมนูอาหาร */}
       <div className="w-full lg:w-2/3 p-3 sm:p-4 overflow-y-auto">
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-2">
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-blue-600">🍽 ส้มตำยโสธร (POS)</h1>
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-3 gap-2">
+          <h1 className="text-2xl font-extrabold text-blue-600">🍽 ส้มตำยโสธร (POS)</h1>
           <div className="flex gap-2">
-            <button onClick={addCustomMenu} className="bg-orange-500 text-white px-4 py-2 rounded-xl font-bold hover:bg-orange-600 shadow text-sm">
-              ✨ เมนูอื่นๆ (พิมพ์เอง)
+            <button onClick={addCustomMenu} className="bg-orange-500 text-white px-3 py-2 rounded-xl font-bold hover:bg-orange-600 shadow text-sm">
+              ✨ เมนูอื่นๆ
             </button>
-            <a href="/summary" target="_blank" className="bg-purple-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-purple-700 shadow text-sm">📊 ยอดขาย</a>
+            <a href="/summary" target="_blank" className="bg-purple-600 text-white px-3 py-2 rounded-xl font-bold hover:bg-purple-700 shadow text-sm">📊 ยอดขาย</a>
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-2 mb-4 sticky top-0 bg-gray-100 py-2 z-10">
+        {/* 🔍 ช่องค้นหาด่วน */}
+        <div className="mb-3">
+          <input 
+            type="text" 
+            placeholder="🔍 พิมพ์ค้นหาชื่อเมนู (เช่น ลาบ, ตำไทย)..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full p-3 border-2 border-blue-400 rounded-xl bg-white font-bold text-lg text-black focus:outline-none"
+          />
+        </div>
+
+        {/* แท็บหมวดหมู่หลัก */}
+        <div className="grid grid-cols-3 gap-2 mb-3">
           <button 
-            onClick={() => setActiveCategory('somtum')}
-            className={`py-3 rounded-2xl font-bold text-base sm:text-lg transition-all shadow ${
-              activeCategory === 'somtum' ? 'bg-green-600 text-white scale-105' : 'bg-white text-gray-700 hover:bg-gray-200 border'
+            onClick={() => { setActiveCategory('somtum'); setSearchQuery(''); }}
+            className={`py-3 rounded-2xl font-bold text-sm sm:text-base transition-all shadow ${
+              activeCategory === 'somtum' && !searchQuery ? 'bg-green-600 text-white scale-105' : 'bg-white text-gray-700 border'
             }`}
           >
             🥗 ส้มตำ (แม่)
           </button>
           <button 
-            onClick={() => setActiveCategory('dad')}
-            className={`py-3 rounded-2xl font-bold text-base sm:text-lg transition-all shadow ${
-              activeCategory === 'dad' ? 'bg-red-600 text-white scale-105' : 'bg-white text-gray-700 hover:bg-gray-200 border'
+            onClick={() => { setActiveCategory('dad'); setSearchQuery(''); }}
+            className={`py-3 rounded-2xl font-bold text-sm sm:text-base transition-all shadow ${
+              activeCategory === 'dad' && !searchQuery ? 'bg-red-600 text-white scale-105' : 'bg-white text-gray-700 border'
             }`}
           >
-            🔥 ต้ม,ยำ,ลาบ,ลวก (พ่อ)
+            🔥 ครัวพ่อ (ต้ม,ยำ,ลาบ)
           </button>
           <button 
-            onClick={() => setActiveCategory('aunt')}
-            className={`py-3 rounded-2xl font-bold text-base sm:text-lg transition-all shadow ${
-              activeCategory === 'aunt' ? 'bg-amber-500 text-white scale-105' : 'bg-white text-gray-700 hover:bg-gray-200 border'
+            onClick={() => { setActiveCategory('aunt'); setSearchQuery(''); }}
+            className={`py-3 rounded-2xl font-bold text-sm sm:text-base transition-all shadow ${
+              activeCategory === 'aunt' && !searchQuery ? 'bg-amber-500 text-white scale-105' : 'bg-white text-gray-700 border'
             }`}
           >
             🍗 ปิ้งย่าง & น้ำ (ป้า)
           </button>
         </div>
 
+        {/* 🔖 หมวดหมู่ย่อย (เฉพาะหน้าครัวพ่อ) */}
+        {activeCategory === 'dad' && !searchQuery && (
+          <div className="grid grid-cols-4 gap-1.5 mb-3 bg-red-950/10 p-2 rounded-xl border border-red-200">
+            <button 
+              onClick={() => setActiveSubCat('yum')}
+              className={`py-2 rounded-xl font-bold text-xs sm:text-sm ${activeSubCat === 'yum' ? 'bg-red-600 text-white' : 'bg-white text-gray-700 border'}`}
+            >
+              🥗 ยำ/ตำพิเศษ
+            </button>
+            <button 
+              onClick={() => setActiveSubCat('soup')}
+              className={`py-2 rounded-xl font-bold text-xs sm:text-sm ${activeSubCat === 'soup' ? 'bg-red-600 text-white' : 'bg-white text-gray-700 border'}`}
+            >
+              🍲 ต้ม/อ่อม/แกง
+            </button>
+            <button 
+              onClick={() => setActiveSubCat('lab')}
+              className={`py-2 rounded-xl font-bold text-xs sm:text-sm ${activeSubCat === 'lab' ? 'bg-red-600 text-white' : 'bg-white text-gray-700 border'}`}
+            >
+              🥩 ลาบ/ก้อย/ซุป
+            </button>
+            <button 
+              onClick={() => setActiveSubCat('luak')}
+              className={`py-2 rounded-xl font-bold text-xs sm:text-sm ${activeSubCat === 'luak' ? 'bg-red-600 text-white' : 'bg-white text-gray-700 border'}`}
+            >
+              🍜 เส้นลวก
+            </button>
+          </div>
+        )}
+
+        {/* รายการปุ่มเมนูอาหาร */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pb-10">
-          {allMenus.filter(m => m.category === activeCategory).map((menu) => (
+          {filteredMenus.map((menu) => (
             <button 
               key={menu.id} 
               onClick={() => addToCart(menu)} 
@@ -390,9 +387,13 @@ export default function Home() {
               <span className="text-sm font-normal mt-1 bg-black/20 px-2 py-0.5 rounded-full">{menu.price} ฿</span>
             </button>
           ))}
+          {filteredMenus.length === 0 && (
+            <p className="col-span-full text-center text-gray-400 py-10 text-lg">ไม่พบเมนูที่ค้นหา</p>
+          )}
         </div>
       </div>
 
+      {/* โซนขวา: ตะกร้าและเลือกโต๊ะ */}
       <div className="w-full lg:w-1/3 bg-white p-4 shadow-xl flex flex-col border-t lg:border-t-0 lg:border-l">
         <h2 className="text-base font-bold text-gray-700 mb-2">📍 เลือกโต๊ะ หรือ ใส่ถุง:</h2>
         
@@ -454,6 +455,11 @@ export default function Home() {
           <button onClick={sendToKitchen} className="w-full bg-blue-600 text-white font-bold text-lg p-3 rounded-xl shadow active:bg-blue-700">🔥 ส่งรายการให้พ่อ</button>
           <button onClick={handleCheckout} className="w-full bg-black text-white font-bold text-lg p-3 rounded-xl shadow active:bg-gray-800">💰 คิดเงิน (บันทึกลงระบบ)</button>
           <button onClick={() => setCart([])} className="w-full text-red-500 font-bold py-1 hover:bg-red-50 rounded-lg text-sm">ล้างรายการทั้งหมด</button>
+        </div>
+
+        {/* 🚀 ลายเซ็นเครดิตผู้พัฒนาสุดหล่อ */}
+        <div className="text-center text-xs font-bold text-gray-400 mt-3 pt-2 border-t">
+          🚀 พัฒนาโดย: ฟิวส์สุดหล่อ 😎
         </div>
       </div>
     </div>
